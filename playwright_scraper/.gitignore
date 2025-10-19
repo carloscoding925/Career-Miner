@@ -1,4 +1,5 @@
 # Playwright
+.DS_Store
 node_modules/
 /test-results/
 /playwright-report/
