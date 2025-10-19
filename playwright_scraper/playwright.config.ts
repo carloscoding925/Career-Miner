@@ -7,7 +7,7 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   use: {
     // Browser context options
-    headless: true, // Set to true to run without opening browser window
+    headless: false, // Set to true to run without opening browser window
     viewport: { width: 1920, height: 1080 },
 
     // Navigation timeout (30 seconds)

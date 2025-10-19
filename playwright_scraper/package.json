@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "scrape:brk": "npx ts-node scraping/brk-careers-scraper.ts"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -11,6 +13,7 @@
   "devDependencies": {
     "@playwright/test": "^1.56.1",
     "@types/node": "^24.8.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   }
 }
