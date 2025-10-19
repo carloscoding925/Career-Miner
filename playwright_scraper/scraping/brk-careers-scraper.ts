@@ -23,30 +23,95 @@ async function scrapeBRKCareers() {
     // Wait a moment for dynamic content to load
     await page.waitForTimeout(2000);
 
-    // TODO: Inspect the page and add your selectors here
-    // Example: Extract job listings
-    // const jobListings = await page.$$eval('.job-card', (elements) => {
-    //   return elements.map(el => ({
-    //     title: el.querySelector('.job-title')?.textContent?.trim(),
-    //     location: el.querySelector('.job-location')?.textContent?.trim(),
-    //     department: el.querySelector('.job-department')?.textContent?.trim(),
-    //   }));
-    // });
+    // Enter search term in the keyword input
+    console.log('Entering search term...');
+    await page.fill('#keyword-input', 'Technology');
 
-    // For now, let's just get the page title to verify it works
+    // Submit the search (press Enter or click submit button)
+    // Option 1: Press Enter key
+    await page.press('#keyword-input', 'Enter');
+
+    // Option 2: If there's a submit button, click it instead:
+    // await page.click('button[type="submit"]'); // Adjust selector as needed
+
+    // Wait for navigation to complete after search submission
+    await page.waitForLoadState('networkidle');
+    console.log('Search submitted, waiting for results...');
+
+    // Wait a moment for search results to load
+    await page.waitForTimeout(2000);
+
+    // Get the new page title to verify we're on the results page
     const pageTitle = await page.title();
-    console.log('Page title:', pageTitle);
+    console.log('Results page title:', pageTitle);
+
+    // Scroll down the page to load all lazy-loaded job postings
+    console.log('Scrolling to load all job postings...');
+    let previousJobCount = 0;
+    let currentJobCount = 0;
+    let scrollAttempts = 0;
+    const maxScrollAttempts = 10;
+
+    do {
+      previousJobCount = currentJobCount;
+
+      // Scroll to the bottom of the page
+      await page.evaluate(() => {
+        window.scrollTo(0, document.body.scrollHeight);
+      });
+
+      // Wait for new content to load
+      await page.waitForTimeout(1000);
+
+      // Count current job postings
+      currentJobCount = await page.$$eval('.job-result', elements => elements.length);
+      console.log(`Current job count: ${currentJobCount}`);
+
+      scrollAttempts++;
+    } while (currentJobCount > previousJobCount && scrollAttempts < maxScrollAttempts);
+
+    console.log(`Finished scrolling. Total jobs visible: ${currentJobCount}`);
+
+    // Scrape all job listings from the results page
+    console.log('Extracting job listings...');
+    const jobListings = await page.$$eval('.job-result', (elements) => {
+      return elements.map(el => {
+        // Find the <a> tag inside the front-section
+        const titleLink = el.querySelector('.front-section a');
+        const title = titleLink?.textContent?.trim() || '';
+        const jobUrl = titleLink?.getAttribute('href') || '';
+
+        // Extract other useful information
+        const jobId = el.querySelector('.title-section__id')?.textContent?.trim() || '';
+        const location = el.querySelector('.tail__location')?.textContent?.replace('Location', '').trim() || '';
+        const postedDate = el.querySelector('.tail__date')?.textContent?.replace('Posted Date', '').trim() || '';
+
+        return {
+          title,
+          jobUrl,
+          jobId,
+          location,
+          postedDate,
+        };
+      });
+    });
+
+    console.log(`Found ${jobListings.length} job listings`);
+    jobListings.forEach((job, index) => {
+      console.log(`${index + 1}. ${job.title}`);
+    });
 
     // Example: Get all text content from the page
     const pageContent = await page.textContent('body');
     console.log('Page loaded successfully!');
     console.log('First 200 characters:', pageContent?.substring(0, 200));
 
-    // TODO: Replace with actual scraped data
+    // Prepare scraped data
     const scrapedData = {
       scrapedAt: new Date().toISOString(),
-      pageTitle: pageTitle,
-      // Add your extracted data here
+      searchTerm: 'Technology',
+      totalJobs: jobListings.length,
+      jobs: jobListings,
     };
 
     // Save data to file
