@@ -25,7 +25,7 @@ async function scrapeBRKCareers() {
 
     // Enter search term in the keyword input
     console.log('Entering search term...');
-    await page.fill('#keyword-input', 'Technology');
+    await page.fill('#keyword-input', 'Information Technology');
 
     // Submit the search (press Enter or click submit button)
     // Option 1: Press Enter key
@@ -72,44 +72,85 @@ async function scrapeBRKCareers() {
 
     console.log(`Finished scrolling. Total jobs visible: ${currentJobCount}`);
 
-    // Scrape all job listings from the results page
-    console.log('Extracting job listings...');
-    const jobListings = await page.$$eval('.job-result', (elements) => {
+    // Scrape all job URLs from the results page
+    console.log('Extracting job URLs...');
+    const jobUrls = await page.$$eval('.job-result', (elements) => {
       return elements.map(el => {
         // Find the <a> tag inside the front-section
         const titleLink = el.querySelector('.front-section a');
         const title = titleLink?.textContent?.trim() || '';
         const jobUrl = titleLink?.getAttribute('href') || '';
-
-        // Extract other useful information
         const jobId = el.querySelector('.title-section__id')?.textContent?.trim() || '';
-        const location = el.querySelector('.tail__location')?.textContent?.replace('Location', '').trim() || '';
-        const postedDate = el.querySelector('.tail__date')?.textContent?.replace('Posted Date', '').trim() || '';
 
         return {
           title,
           jobUrl,
           jobId,
-          location,
-          postedDate,
         };
       });
     });
 
-    console.log(`Found ${jobListings.length} job listings`);
-    jobListings.forEach((job, index) => {
-      console.log(`${index + 1}. ${job.title}`);
-    });
+    console.log(`Found ${jobUrls.length} job listings`);
 
-    // Example: Get all text content from the page
-    const pageContent = await page.textContent('body');
-    console.log('Page loaded successfully!');
-    console.log('First 200 characters:', pageContent?.substring(0, 200));
+    // Now visit each job page and scrape detailed information
+    const jobListings = [];
+    for (let i = 0; i < jobUrls.length; i++) {
+      const job = jobUrls[i];
+      console.log(`\nScraping job ${i + 1}/${jobUrls.length}: ${job.title}`);
+
+      try {
+        // Navigate to the job detail page
+        await page.goto(job.jobUrl, { waitUntil: 'networkidle' });
+        await page.waitForTimeout(1000);
+
+        // Scrape detailed information from the job page
+        const jobDetails = await page.evaluate(() => {
+          // Customize these selectors based on what data you want from the job page
+          // This is a template - you'll need to inspect the actual job page to find the right selectors
+
+          const getTextContent = (selector: string) => {
+            const element = document.querySelector(selector);
+            return element?.textContent?.trim() || '';
+          };
+
+          return {
+            // Job title from detail page
+            jobTitle: getTextContent('h1.job-details__title'),
+            // Job description
+            description: getTextContent('.job-details__description-content'),
+            // Add more fields as needed
+            fullPageText: document.body.innerText, // Fallback: get all text
+          };
+        });
+
+        // Combine listing info with detailed info
+        jobListings.push({
+          title: job.title,
+          jobId: job.jobId,
+          jobUrl: job.jobUrl,
+          ...jobDetails,
+        });
+
+        console.log(`✓ Successfully scraped: ${job.title}`);
+
+      } catch (error) {
+        console.error(`✗ Error scraping ${job.title}:`, error);
+        // Add the job with basic info even if scraping fails
+        jobListings.push({
+          title: job.title,
+          jobId: job.jobId,
+          jobUrl: job.jobUrl,
+          error: 'Failed to scrape job details',
+        });
+      }
+    }
+
+    console.log(`\nSuccessfully scraped ${jobListings.length} jobs`);
 
     // Prepare scraped data
     const scrapedData = {
       scrapedAt: new Date().toISOString(),
-      searchTerm: 'Technology',
+      searchTerm: 'Information Technology',
       totalJobs: jobListings.length,
       jobs: jobListings,
     };
