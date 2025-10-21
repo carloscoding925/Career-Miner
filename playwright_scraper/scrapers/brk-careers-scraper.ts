@@ -105,12 +105,21 @@ async function scrapeBRKCareers() {
 
         // Scrape detailed information from the job page
         const jobDetails = await page.evaluate(() => {
-          // Customize these selectors based on what data you want from the job page
-          // This is a template - you'll need to inspect the actual job page to find the right selectors
-
           const getTextContent = (selector: string) => {
             const element = document.querySelector(selector);
             return element?.textContent?.trim() || '';
+          };
+
+          // Function to get job metadata by title
+          const getMetaValue = (titleText: string) => {
+            const metaItems = document.querySelectorAll('.job-meta__item');
+            for (const item of metaItems) {
+              const title = item.querySelector('.job-meta__title')?.textContent?.trim();
+              if (title === titleText) {
+                return item.querySelector('.job-meta__subitem')?.textContent?.trim() || '';
+              }
+            }
+            return '';
           };
 
           return {
@@ -118,8 +127,8 @@ async function scrapeBRKCareers() {
             jobTitle: getTextContent('h1.job-details__title'),
             // Job description
             description: getTextContent('.job-details__description-content'),
-            // Add more fields as needed
-            fullPageText: document.body.innerText, // Fallback: get all text
+            // Pay range from job metadata
+            payRange: getMetaValue('Pay Range'),
           };
         });
 
