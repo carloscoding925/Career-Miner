@@ -170,6 +170,14 @@ async function scrapeBRKCareers() {
       fs.mkdirSync(outputDir, { recursive: true });
     }
 
+    // Delete old output files
+    const files = fs.readdirSync(outputDir);
+    const oldFiles = files.filter(file => file.startsWith('brk-careers-') && file.endsWith('.json'));
+    oldFiles.forEach(file => {
+      fs.unlinkSync(path.join(outputDir, file));
+      console.log(`Deleted old file: ${file}`);
+    });
+
     const timestamp = new Date().toISOString().replace(/:/g, '-').split('.')[0];
     const outputFile = path.join(outputDir, `brk-careers-${timestamp}.json`);
 
