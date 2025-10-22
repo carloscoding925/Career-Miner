@@ -1,4 +1,4 @@
-import { Browser, BrowserContext, chromium, Page } from "@playwright/test";
+import { Browser, BrowserContext, chromium, Page } from "playwright";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
@@ -46,9 +46,9 @@ async function scrapeBheCareers() {
     const jobSearchTerm: string = 'Information Technology';
     const outputDirectory: string = '../data_output';
 
-    /*const __filename: string = fileURLToPath(import.meta.url);
+    const __filename: string = fileURLToPath(import.meta.url);
+    const __dirname: string = path.dirname(__filename);
     const scraperPrefix: string = path.basename(__filename, '.ts').replace('-scraper', '');
-    console.log(scraperPrefix);*/
 
     try {
         // Page Navigation
@@ -175,14 +175,14 @@ async function scrapeBheCareers() {
         }
 
         const files: string[] = fs.readdirSync(outputDir);
-        const oldFiles: string[] = files.filter(file => file.startsWith('0001-bhe-careers-') && file.endsWith('.json'));
+        const oldFiles: string[] = files.filter(file => file.startsWith(scraperPrefix) && file.endsWith('.json'));
         oldFiles.forEach(file => {
             fs.unlinkSync(path.join(outputDir, file));
             console.log(`Deleted Old File: ${file}`)
         });
 
         const timestamp: string = new Date().toISOString().replace(/:/g, '-').split('.')[0];
-        const outputFile: string = path.join(outputDir, `0001-bhe-careers-${timestamp}.json`);
+        const outputFile: string = path.join(outputDir, `${scraperPrefix}-${timestamp}.json`);
 
         fs.writeFileSync(outputFile, JSON.stringify(scrapedData, null, 2));
         console.log(`Data saved to: ${outputFile}`);
