@@ -1,7 +1,9 @@
 import { Browser, BrowserContext, chromium, Page } from "@playwright/test";
 import path from "path";
 import fs from "fs";
+import { fileURLToPath } from "url";
 
+// Types for Data Cleaning
 type PostingData = {
     title: string,
     jobUrl: string,
@@ -32,17 +34,24 @@ type ScrapedData = {
 async function scrapeBheCareers() {
     console.log("Running Scraper 0001 - BHE Careers");
 
+    // Launch Browser
     const browser: Browser = await chromium.launch({
         headless: false
     });
 
+    // Browser and Scraper constants
     const context: BrowserContext = await browser.newContext();
     const page: Page = await context.newPage();
     const pageURL: string = 'https://careers.brkenergy.com/home';
     const jobSearchTerm: string = 'Information Technology';
     const outputDirectory: string = '../data_output';
 
+    /*const __filename: string = fileURLToPath(import.meta.url);
+    const scraperPrefix: string = path.basename(__filename, '.ts').replace('-scraper', '');
+    console.log(scraperPrefix);*/
+
     try {
+        // Page Navigation
         console.log("Navigating to Careers Page");
         await page.goto(pageURL, {
             waitUntil: "load"
@@ -64,6 +73,7 @@ async function scrapeBheCareers() {
         let scrollAttempts: number = 0;
         const maxScrollAttempts: number = 10;
 
+        // Scroll to load all jobs
         do {
             previousJobCount = currentJobCount;
 
@@ -79,6 +89,7 @@ async function scrapeBheCareers() {
         } while (currentJobCount > previousJobCount && scrollAttempts < maxScrollAttempts);
         console.log(`Finished Scrolling - ${currentJobCount} Jobs Visible`);
 
+        // Examine every posting and extract job URL
         console.log("Extracting Job URL's");
         const jobUrls: PostingData[] = await page.$$eval('.job-result', (elements) => {
             return elements.map(el => {
@@ -96,6 +107,7 @@ async function scrapeBheCareers() {
         });
         console.log(`Found ${jobUrls.length} Job Postings`);
 
+        // Enter every job posting page and extract data
         const jobListings: JobDetails[] = [];
         let errorCount: number = 0;
         let successCount: number = 0;
@@ -148,6 +160,7 @@ async function scrapeBheCareers() {
         }
         console.log(`Successfully Scraped ${successCount} Jobs With ${errorCount} Errors`);
 
+        // Create Data JSON
         const scrapedData: ScrapedData = {
             scrapedAt: new Date().toISOString(),
             searchTerm: jobSearchTerm,
@@ -155,6 +168,7 @@ async function scrapeBheCareers() {
             jobs: jobListings
         };
 
+        // Delete old output file and store new file
         const outputDir: string = path.join(__dirname, outputDirectory);
         if (!fs.existsSync(outputDir)) {
             fs.mkdirSync(outputDir, { recursive: true })
