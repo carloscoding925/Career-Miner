@@ -1,10 +1,9 @@
 {
-  "scrapedAt": "2025-10-21T00:21:40.892Z",
+  "scrapedAt": "2025-10-22T01:28:43.038Z",
   "searchTerm": "Information Technology",
   "totalJobs": 19,
   "jobs": [
     {
-      "title": "Intern - Information Technology",
       "jobId": "Job Identification 10003622",
       "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10003622",
       "jobTitle": "Intern - Information Technology",
@@ -12,7 +11,13 @@
       "payRange": "$20.00 - $26.00"
     },
     {
-      "title": "Sys & Development Analyst 1/2",
+      "jobId": "Job Identification 10003601",
+      "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10003601",
+      "jobTitle": "Solutions Architect– GridOPS",
+      "description": "The Solutions Architect is responsible for the creation, maintenance and management of IT/OT architecture models for GridOPS. This role serves as the technical authority bridging business requirements, grid operations, and IT/OT systems, ensuring that ADMS capabilities (such as outage management, distribution SCADA, DERMS integration, and advanced grid analytics) are successfully deployed and aligned with the utility’s operational and regulatory goals. They are also required to interpret, use and apply information contained within the IT/OT architecture to inform a range of business improvement activities, particularly those involved in the design, development, enhancement and maintenance of IT/OT support systems. The Solutions Architect will ensure that the overall IT/OT architecture is developed and maintained in a coherent manner and that appropriate considerations are made for its security and quality. The primary role of the Solutions Architect is to ensure that the respective business, application, data and technology perspectives are in line with the company’s technology and governance strategies, policies and standards.",
+      "payRange": "$137,000-$161,200"
+    },
+    {
       "jobId": "Job Identification 10003773",
       "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10003773",
       "jobTitle": "Sys & Development Analyst 1/2",
@@ -20,7 +25,6 @@
       "payRange": "$67,100 - $96,500"
     },
     {
-      "title": "Sys & Development Analyst 3/Sr/Specialist - SAP/Success Factors",
       "jobId": "Job Identification 10003758",
       "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10003758",
       "jobTitle": "Sys & Development Analyst 3/Sr/Specialist - SAP/Success Factors",
@@ -28,15 +32,6 @@
       "payRange": "$88,800 - $146,700"
     },
     {
-      "title": "IT Enterprise Specialist 2",
-      "jobId": "Job Identification 10003194",
-      "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10003194",
-      "jobTitle": "IT Enterprise Specialist 2",
-      "description": "Basic Purpose\nProvides personal computer hardware and software installation, configuration and troubleshooting for internal customers.",
-      "payRange": "$32.84 to 38.61 hour."
-    },
-    {
-      "title": "Business Systems Analyst 1/Business Systems Analyst 2/Business Systems Analyst 3",
       "jobId": "Job Identification 10003429",
       "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10003429",
       "jobTitle": "Business Systems Analyst 1/Business Systems Analyst 2/Business Systems Analyst 3",
@@ -44,7 +39,6 @@
       "payRange": "68,300-106,200"
     },
     {
-      "title": "Bus Sys Anlst IV - Cust Ops",
       "jobId": "Job Identification 10003687",
       "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10003687",
       "jobTitle": "Bus Sys Anlst IV - Cust Ops",
@@ -52,7 +46,13 @@
       "payRange": "$103,800-$122,000"
     },
     {
-      "title": "Sys & Development Analyst 1/2/3/Sr",
+      "jobId": "Job Identification 10003194",
+      "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10003194",
+      "jobTitle": "IT Enterprise Specialist 2",
+      "description": "Basic Purpose\nProvides personal computer hardware and software installation, configuration and troubleshooting for internal customers.",
+      "payRange": "$32.84 to 38.61 hour."
+    },
+    {
       "jobId": "Job Identification 10003650",
       "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10003650",
       "jobTitle": "Sys & Development Analyst 1/2/3/Sr",
@@ -60,7 +60,6 @@
       "payRange": "$68,300-$122,000"
     },
     {
-      "title": "2026 Database Engineer Intern",
       "jobId": "Job Identification 10003763",
       "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10003763",
       "jobTitle": "2026 Database Engineer Intern",
@@ -68,7 +67,6 @@
       "payRange": "$17.50 - $27.00"
     },
     {
-      "title": "NOC Technician 3",
       "jobId": "Job Identification 10003399",
       "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10003399",
       "jobTitle": "NOC Technician 3",
@@ -76,15 +74,13 @@
       "payRange": "$37.74-$44.38"
     },
     {
-      "title": "Software Engineer 1/2/3 - Reports Developer",
-      "jobId": "Job Identification 10003649",
-      "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10003649",
-      "jobTitle": "Software Engineer 1/2/3 - Reports Developer",
-      "description": "The software engineer I participates in the design, programming, testing, documentation and implementation of computer applications and systems. Evaluates software packages, provides recommendations to management and business clients, and identifies best technology solutions. Identifies future needs for key technologies and techniques and develops plans for adoption.",
-      "payRange": "$78,500 - $122,000"
+      "jobId": "Job Identification 10003782",
+      "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10003782",
+      "jobTitle": "Intern - Telecom Engineering",
+      "description": "Company and Internship Program Overview \n\n\n MidAmerican Energy Company one of the largest renewable energy producers in the U.S is headquartered in Des Moines, Iowa, safely meeting the energy needs of more than 1.6 million customers in Iowa, Illinois, Nebraska, and South Dakota. A subsidiary of Berkshire Hathaway Energy, we have more than 3,400 dedicated employees serving our customers every day across our service territory. \n\n\n Interns will have the opportunity to participate in the annual three-day summer intern event in Des Moines, Iowa where they will have the opportunity to tour state-of-the-art facilities, network with leadership, and gain a broader understanding of MidAmerican Energy Company. Other panels, lunch and learns, and events will be happening throughout the summer to give our interns the best experience.",
+      "payRange": "18-25"
     },
     {
-      "title": "Intern - Data Science, Contract Operations",
       "jobId": "Job Identification 10003267",
       "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10003267",
       "jobTitle": "Intern - Data Science, Contract Operations",
@@ -92,7 +88,6 @@
       "payRange": "20.00-28.00"
     },
     {
-      "title": "Energy Management System (EMS) Analyst 1, 2 or 3",
       "jobId": "Job Identification 10002844",
       "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10002844",
       "jobTitle": "Energy Management System (EMS) Analyst 1, 2 or 3",
@@ -100,7 +95,6 @@
       "payRange": "$78,500-$122,00"
     },
     {
-      "title": "Intern - Enterprise Analytics",
       "jobId": "Job Identification 10003138",
       "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10003138",
       "jobTitle": "Intern - Enterprise Analytics",
@@ -108,7 +102,6 @@
       "payRange": "20-26.00"
     },
     {
-      "title": "Customer Service Representative 1/Customer Service Representative 2/Sr Customer Service Representative",
       "jobId": "Job Identification 10002481",
       "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10002481",
       "jobTitle": "Customer Service Representative 1/Customer Service Representative 2/Sr Customer Service Representative",
@@ -116,7 +109,6 @@
       "payRange": "68,300-106,200"
     },
     {
-      "title": "Telecommunications Engineer IV",
       "jobId": "Job Identification 10003539",
       "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10003539",
       "jobTitle": "Telecommunications Engineer IV",
@@ -124,15 +116,6 @@
       "payRange": "$119,400.00 - $140,400.00 per year."
     },
     {
-      "title": "Cyber Security Architect – Physical Security",
-      "jobId": "Job Identification 10003628",
-      "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10003628",
-      "jobTitle": "Cyber Security Architect – Physical Security",
-      "description": "This position is responsible for designing and evaluating security architectures with an emphasis on physical security systems and controls. This position ensures that physical security measures integrate seamlessly with cybersecurity frameworks to protect critical infrastructure and assets. The position requires proven experience in physical security technologies, standards, and risk management.",
-      "payRange": "$137,000-$161,200"
-    },
-    {
-      "title": "Engineer I/Engineer II/Sr Engineer/Sr Engineer II",
       "jobId": "Job Identification 10003671",
       "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10003671",
       "jobTitle": "Engineer I/Engineer II/Sr Engineer/Sr Engineer II",
@@ -140,7 +123,6 @@
       "payRange": "78,500-131,200"
     },
     {
-      "title": "Intern - Corporate Accounting and Financial Reporting, BHE",
       "jobId": "Job Identification 10003779",
       "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10003779",
       "jobTitle": "Intern - Corporate Accounting and Financial Reporting, BHE",
@@ -148,7 +130,6 @@
       "payRange": "17.50-27.00"
     },
     {
-      "title": "Manager, Operations Technology",
       "jobId": "Job Identification 10003523",
       "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10003523",
       "jobTitle": "Manager, Operations Technology",

@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "scrape:brk": "npx ts-node scrapers/brk-careers-scraper.ts"
+    "scrape:bhe": "npx ts-node scrapers/0001-bhe-careers-scraper"
   },
   "keywords": [],
   "author": "",
