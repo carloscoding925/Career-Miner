@@ -1,11 +1,11 @@
 import { Browser, BrowserContext, chromium, Page } from "playwright";
 import path from "path";
 import { fileURLToPath } from "url";
-import { getFilePrefix } from "../utils/naming-util";
-import { outputDirectory } from "../constants/directories";
-import { departmentSearchTerm } from "../constants/search-terms";
-import { deleteOldFiles, writeNewFile } from "../utils/file-io-util";
-import { JobDetails, JobMetaDetails, PostingData, ScrapedData } from "../models/data-storage";
+import { getFilePrefix } from "../utils/naming-util.js";
+import { outputDirectory } from "../constants/directories.js";
+import { departmentSearchTerm } from "../constants/search-terms.js";
+import { deleteOldFiles, writeNewFile } from "../utils/file-io-util.js";
+import { JobDetails, JobMetaDetails, PostingData, ScrapedData } from "../models/data-storage.js";
 
 async function scrapeBheCareers() {
     console.log("Running Scraper 0001 - BHE Careers");

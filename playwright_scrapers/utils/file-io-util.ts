@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { ScrapedData } from "../models/data-storage";
+import { ScrapedData } from "../models/data-storage.js";
 
 export function deleteOldFiles(outputDir: string, filePrefix: string) {
     if (!fs.existsSync(outputDir)) {

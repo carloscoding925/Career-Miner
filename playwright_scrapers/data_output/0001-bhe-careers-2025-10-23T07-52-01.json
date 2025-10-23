@@ -1,7 +1,7 @@
 {
-  "scrapedAt": "2025-10-22T23:19:19.667Z",
+  "scrapedAt": "2025-10-23T07:52:01.155Z",
   "searchTerm": "Information Technology",
-  "totalJobs": 18,
+  "totalJobs": 17,
   "jobs": [
     {
       "jobId": "Job Identification 10003622",
@@ -44,13 +44,6 @@
       "jobTitle": "Sys & Development Analyst 1/2/3/Sr",
       "description": "Under direct supervision, the systems and development analyst I conducts analysis, creates system specifications, develops, tests and implements engineering, scientific and business applications, operating systems, and file/database servers. Utilizes existing or new technology in the automation of processes. Evaluates software packages and provides recommendations to management.",
       "payRange": "$68,300-$122,000"
-    },
-    {
-      "jobId": "Job Identification 10003687",
-      "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10003687",
-      "jobTitle": "Bus Sys Anlst IV - Cust Ops",
-      "description": "Basic Purpose\nConducts complex analysis, prepares associated business requirement specifications, designs, plans, tests and implements modifications and enhancements to customer operations business systems. Applies technical and business knowledge, skills, and judgment to problem solve system issues.  Provides on-going user business system support.  Performs complex analysis to predict outcomes and recommends possible solutions to meet business operational needs.  May be required to work on special projects or to provide work direction and technical assistance to less experienced staff.  Operates under minimal supervision.",
-      "payRange": "$103,800-$122,000"
     },
     {
       "jobId": "Job Identification 10003194",
