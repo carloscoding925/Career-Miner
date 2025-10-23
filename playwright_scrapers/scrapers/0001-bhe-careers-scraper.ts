@@ -67,12 +67,10 @@ async function scrapeBheCareers() {
                 const titleLink: Element | null = el.querySelector('.front-section a');
                 const title: string = titleLink?.textContent?.trim() || '';
                 const jobUrl: string = titleLink?.getAttribute('href') || '';
-                const jobId: string = el.querySelector('.title-section__id')?.textContent?.trim() || '';
 
                 return {
                     title,
-                    jobUrl,
-                    jobId,
+                    jobUrl
                 } as PostingData;
             });
         });
@@ -89,7 +87,7 @@ async function scrapeBheCareers() {
 
             try {
                 await page.goto(job.jobUrl, { waitUntil: 'load' });
-                await page.waitForTimeout(1000);
+                await page.waitForSelector('h1.job-details__title', { timeout: 5000 });
 
                 const jobMetaDetails: JobMetaDetails = await page.evaluate(() => {
                     const getTextContent = (selector: string): string => {
@@ -112,12 +110,14 @@ async function scrapeBheCareers() {
                     return {
                         jobTitle: getTextContent('h1.job-details__title'),
                         description: getTextContent('.job-details__description-content'),
-                        payRange: getMetaValue('Pay Range')
+                        payRange: getMetaValue('Pay Range'),
+                        location: getMetaValue('Locations'),
+                        postingDate: getMetaValue('Posting Date'),
+                        jobId: getMetaValue('Job Identification')
                     } as JobMetaDetails;
                 });
 
                 jobListings.push({
-                    jobId: job.jobId,
                     jobUrl: job.jobUrl,
                     ...jobMetaDetails
                 } as JobDetails );

@@ -1,21 +1,25 @@
 export type PostingData = {
     title: string,
-    jobUrl: string,
-    jobId: string
+    jobUrl: string
 }
 
 export type JobMetaDetails = {
     jobTitle: string,
     description: string,
-    payRange: string
+    payRange: string,
+    location: string,
+    postingDate: string,
+    jobId: string
 }
 
 export type JobDetails = {
     jobUrl: string,
-    jobId: string,
     jobTitle: string,
     description: string,
-    payRange: string
+    payRange: string,
+    location: string,
+    postingDate: string,
+    jobId: string
 }
 
 export type ScrapedData = {
