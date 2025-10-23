@@ -1,9 +1,9 @@
-export type PostingData = {
+export type PostingCoverData = {
     title: string,
     jobUrl: string
 }
 
-export type JobMetaDetails = {
+export type JobMetaData = {
     jobTitle: string,
     description: string,
     payRange: string,
@@ -12,7 +12,7 @@ export type JobMetaDetails = {
     jobId: string
 }
 
-export type JobDetails = {
+export type FullJobDetails = {
     jobUrl: string,
     jobTitle: string,
     description: string,
@@ -27,5 +27,5 @@ export type ScrapedData = {
     scrapedAt: string,
     searchTerm: string,
     totalJobs: number,
-    jobs: JobDetails[]
+    jobs: FullJobDetails[]
 }
