@@ -8,6 +8,7 @@ import { deleteOldFiles, writeNewFile } from "../utils/file-io-util.js";
 import { JobDetails, JobMetaDetails, PostingData, ScrapedData } from "../models/data-storage.js";
 import { BHE_CAREERS } from "../constants/companies.js";
 import { CompanyNames } from "../models/company-names.js";
+import { createJobDetails, validateJobDetails } from "../utils/data-util.js";
 
 async function scrapeBheCareers() {
     console.log("Running Scraper 0001 - BHE Careers");
@@ -117,11 +118,16 @@ async function scrapeBheCareers() {
                     } as JobMetaDetails;
                 });
 
-                jobListings.push({
-                    jobUrl: job.jobUrl,
-                    ...jobMetaDetails
-                } as JobDetails );
+                const jobDetails: JobDetails = createJobDetails(job.jobUrl, jobMetaDetails);
+                const isValid: boolean = validateJobDetails(jobDetails);
 
+                if (!isValid) {
+                    console.log(`⚠ Invalid data for job: ${i + 1}/${jobUrls.length} - ${job.title}, skipping`);
+                    errorCount++;
+                    continue;
+                }
+
+                jobListings.push(jobDetails);
                 console.log(`✓ Successfully Scraped Job: ${job.title}`);
                 successCount++;
             } catch (error) {
