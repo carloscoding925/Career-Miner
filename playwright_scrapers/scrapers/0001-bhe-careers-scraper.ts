@@ -1,35 +1,11 @@
 import { Browser, BrowserContext, chromium, Page } from "playwright";
 import path from "path";
-import fs from "fs";
 import { fileURLToPath } from "url";
-
-// Types for Data Cleaning
-type PostingData = {
-    title: string,
-    jobUrl: string,
-    jobId: string
-}
-
-type JobMetaDetails = {
-    jobTitle: string,
-    description: string,
-    payRange: string
-}
-
-type JobDetails = {
-    jobUrl: string,
-    jobId: string,
-    jobTitle: string,
-    description: string,
-    payRange: string
-}
-
-type ScrapedData = {
-    scrapedAt: string,
-    searchTerm: string,
-    totalJobs: number,
-    jobs: JobDetails[]
-}
+import { getFilePrefix } from "../utils/naming-util";
+import { outputDirectory } from "../constants/directories";
+import { departmentSearchTerm } from "../constants/search-terms";
+import { deleteOldFiles, writeNewFile } from "../utils/file-io-util";
+import { JobDetails, JobMetaDetails, PostingData, ScrapedData } from "../models/data-storage";
 
 async function scrapeBheCareers() {
     console.log("Running Scraper 0001 - BHE Careers");
@@ -43,12 +19,10 @@ async function scrapeBheCareers() {
     const context: BrowserContext = await browser.newContext();
     const page: Page = await context.newPage();
     const pageURL: string = 'https://careers.brkenergy.com/home';
-    const jobSearchTerm: string = 'Information Technology';
-    const outputDirectory: string = '../data_output';
 
     const __filename: string = fileURLToPath(import.meta.url);
     const __dirname: string = path.dirname(__filename);
-    const scraperPrefix: string = path.basename(__filename, '.ts').replace('-scraper', '');
+    const scraperPrefix: string = getFilePrefix(__filename);
 
     try {
         // Page Navigation
@@ -59,8 +33,8 @@ async function scrapeBheCareers() {
 
         await page.waitForTimeout(3000);
 
-        console.log(`Entering Job Search Term: ${jobSearchTerm}`);
-        await page.fill('#keyword-input', jobSearchTerm);
+        console.log(`Entering Job Search Term: ${departmentSearchTerm}`);
+        await page.fill('#keyword-input', departmentSearchTerm);
         await page.press('#keyword-input', 'Enter');
 
         await page.waitForLoadState('load');
@@ -163,29 +137,15 @@ async function scrapeBheCareers() {
         // Create Data JSON
         const scrapedData: ScrapedData = {
             scrapedAt: new Date().toISOString(),
-            searchTerm: jobSearchTerm,
+            searchTerm: departmentSearchTerm,
             totalJobs: jobListings.length,
             jobs: jobListings
         };
 
         // Delete old output file and store new file
         const outputDir: string = path.join(__dirname, outputDirectory);
-        if (!fs.existsSync(outputDir)) {
-            fs.mkdirSync(outputDir, { recursive: true })
-        }
-
-        const files: string[] = fs.readdirSync(outputDir);
-        const oldFiles: string[] = files.filter(file => file.startsWith(scraperPrefix) && file.endsWith('.json'));
-        oldFiles.forEach(file => {
-            fs.unlinkSync(path.join(outputDir, file));
-            console.log(`Deleted Old File: ${file}`)
-        });
-
-        const timestamp: string = new Date().toISOString().replace(/:/g, '-').split('.')[0];
-        const outputFile: string = path.join(outputDir, `${scraperPrefix}-${timestamp}.json`);
-
-        fs.writeFileSync(outputFile, JSON.stringify(scrapedData, null, 2));
-        console.log(`Data saved to: ${outputFile}`);
+        deleteOldFiles(outputDir, scraperPrefix);
+        writeNewFile(outputDir, scraperPrefix, scrapedData);
     } catch (error) {
         console.log("Error Occured While Scraping: " + error);
     } finally {

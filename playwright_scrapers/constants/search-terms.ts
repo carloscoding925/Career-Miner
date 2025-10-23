@@ -1,0 +1,1 @@
+export const departmentSearchTerm: string = 'Information Technology';
