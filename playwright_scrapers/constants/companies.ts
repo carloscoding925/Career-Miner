@@ -1,0 +1,1 @@
+export const BHE_CAREERS: string = 'https://careers.brkenergy.com/home';

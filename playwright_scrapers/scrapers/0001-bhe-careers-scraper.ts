@@ -6,6 +6,8 @@ import { outputDirectory } from "../constants/directories.js";
 import { departmentSearchTerm } from "../constants/search-terms.js";
 import { deleteOldFiles, writeNewFile } from "../utils/file-io-util.js";
 import { JobDetails, JobMetaDetails, PostingData, ScrapedData } from "../models/data-storage.js";
+import { BHE_CAREERS } from "../constants/companies.js";
+import { CompanyNames } from "../models/company-names.js";
 
 async function scrapeBheCareers() {
     console.log("Running Scraper 0001 - BHE Careers");
@@ -18,16 +20,11 @@ async function scrapeBheCareers() {
     // Browser and Scraper constants
     const context: BrowserContext = await browser.newContext();
     const page: Page = await context.newPage();
-    const pageURL: string = 'https://careers.brkenergy.com/home';
-
-    const __filename: string = fileURLToPath(import.meta.url);
-    const __dirname: string = path.dirname(__filename);
-    const scraperPrefix: string = getFilePrefix(__filename);
 
     try {
         // Page Navigation
         console.log("Navigating to Careers Page");
-        await page.goto(pageURL, {
+        await page.goto(BHE_CAREERS, {
             waitUntil: "load"
         });
 
@@ -136,11 +133,17 @@ async function scrapeBheCareers() {
 
         // Create Data JSON
         const scrapedData: ScrapedData = {
+            companyName: CompanyNames.BHE,
             scrapedAt: new Date().toISOString(),
             searchTerm: departmentSearchTerm,
             totalJobs: jobListings.length,
             jobs: jobListings
         };
+
+        // File and Directory Variables
+        const __filename: string = fileURLToPath(import.meta.url);
+        const __dirname: string = path.dirname(__filename);
+        const scraperPrefix: string = getFilePrefix(__filename);
 
         // Delete old output file and store new file
         const outputDir: string = path.join(__dirname, outputDirectory);

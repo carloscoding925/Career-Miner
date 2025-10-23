@@ -19,6 +19,7 @@ export type JobDetails = {
 }
 
 export type ScrapedData = {
+    companyName: string,
     scrapedAt: string,
     searchTerm: string,
     totalJobs: number,
