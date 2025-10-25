@@ -1,6 +1,6 @@
 {
   "companyName": "Berkshire Hathaway Energy",
-  "scrapedAt": "2025-10-23T22:06:40.177Z",
+  "scrapedAt": "2025-10-25T04:30:55.423Z",
   "searchTerm": "Information Technology",
   "totalJobs": 17,
   "jobs": [
@@ -68,15 +68,6 @@
       "jobId": "10003194"
     },
     {
-      "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10003763",
-      "jobTitle": "2026 Database Engineer Intern",
-      "description": "The purpose of the internship position is to develop college students that are pursuing a bachelor's degree in engineering, information technology (IT), information systems, library and information science, computer science, data management, or a similar field. Interns will be exposed to a variety of projects and activities that occur within the renewable energy business. Interns will have the opportunity to apply knowledge and skills learned in college and demonstrate abilities in the workplace. The position is temporary, nonexempt, part-time/hourly.",
-      "payRange": "$17.50 - $27.00",
-      "location": "7030 Gentry Road, Calipatria, CA, 92233, US",
-      "postingDate": "10/20/2025, 01:17 PM",
-      "jobId": "10003763"
-    },
-    {
       "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10003399",
       "jobTitle": "NOC Technician 3",
       "description": "The BHE Network Operations Center (NOC) is seeking a highly skilled and experienced Network Operations Analyst III to serve as a senior technical lead and escalation point within our 24x7x365 operations team and to assist with support of multi-platform, enterprise-level systems operations. The NOC Analyst III is responsible for ensuring operational excellence by leading daily shift activities, enforcing process adherence, driving continuous improvement, and coordinating escalations with engineering teams and vendors. This position plays a key role in enhancing customer satisfaction through clear communication, timely updates, and professional engagement with stakeholders, end users, and business partners. \nAdditionally, this role serves as a critical support to the supervisor, with the ability to backfill supervisory duties when needed, including monitoring team activities and performance, assisting in incident management, and providing training and development for the team. Solid foundational networking knowledge and troubleshooting skills are required. The ideal candidate will possess qualities such as expert-level NOC experience and a familiarity with NOC related tasks, a thorough understanding of M365 and associated software and applications, & effective leadership and communication skills that will be used to lead and mentor junior team members.",
@@ -84,6 +75,15 @@
       "location": "7155 Lindell Rd, Las Vegas, NV, 89146, US",
       "postingDate": "09/30/2025, 10:42 PM",
       "jobId": "10003399"
+    },
+    {
+      "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10003763",
+      "jobTitle": "2026 Database Engineer Intern",
+      "description": "The purpose of the internship position is to develop college students that are pursuing a bachelor's degree in engineering, information technology (IT), information systems, library and information science, computer science, data management, or a similar field. Interns will be exposed to a variety of projects and activities that occur within the renewable energy business. Interns will have the opportunity to apply knowledge and skills learned in college and demonstrate abilities in the workplace. The position is temporary, nonexempt, part-time/hourly.",
+      "payRange": "$17.50 - $27.00",
+      "location": "7030 Gentry Road, Calipatria, CA, 92233, US",
+      "postingDate": "10/20/2025, 01:17 PM",
+      "jobId": "10003763"
     },
     {
       "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10003782",
@@ -113,13 +113,13 @@
       "jobId": "10003267"
     },
     {
-      "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10003138",
-      "jobTitle": "Intern - Enterprise Analytics",
-      "description": "MidAmerican Energy Company is seeking a student pursuing a bachelor's degree program in data analytics, computer science, management information systems, mathematics, or related field of study. Enterprise Analytics interns will be exposed to a variety of projects and activities that occur within the energy industry. Interns will have the opportunity to apply their knowledge and skills learned through college and apply them to the workplace. The position is temporary, nonexempt, and full-time/hourly through the summer. \nCompany and Internship Program Overview\nMidAmerican Energy Company one of the largest renewable energy producers in the U.S is headquartered in Des Moines, Iowa, safely meeting the energy needs of more than 1.6 million customers in Iowa, Illinois, Nebraska, and South Dakota. A subsidiary of Berkshire Hathaway Energy, we have more than 3,400 dedicated employees serving our customers every day across our service territory.\nInterns will have the opportunity to participate in the annual three-day summer intern event in Des Moines, Iowa where they will have the opportunity to tour state-of-the-art facilities, network with leadership, and gain a broader understanding of MidAmerican Energy Company. Other panels, lunch and learns, and events will be happening throughout the summer to give our interns the best experience.",
-      "payRange": "20-26.00",
-      "location": "4299 NW Urbandale Dr, Urbandale, IA, 50322, US",
-      "postingDate": "10/17/2025, 10:49 AM",
-      "jobId": "10003138"
+      "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10002481",
+      "jobTitle": "Customer Service Representative 1/Customer Service Representative 2/Sr Customer Service Representative",
+      "description": "BHE GT&S has an exciting opportunity as a Customer Service Representative 1, Customer Service Representative 2, or Senior Customer Service Representative at our Headquarters in Glen Allen, VA.",
+      "payRange": "68,300-106,200",
+      "location": "10700 Energy Way, Glen Allen, VA, 23060, US",
+      "postingDate": "10/03/2025, 12:24 PM",
+      "jobId": "10002481"
     },
     {
       "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10003539",
@@ -131,13 +131,13 @@
       "jobId": "10003539"
     },
     {
-      "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10002481",
-      "jobTitle": "Customer Service Representative 1/Customer Service Representative 2/Sr Customer Service Representative",
-      "description": "BHE GT&S has an exciting opportunity as a Customer Service Representative 1, Customer Service Representative 2, or Senior Customer Service Representative at our Headquarters in Glen Allen, VA.",
-      "payRange": "68,300-106,200",
-      "location": "10700 Energy Way, Glen Allen, VA, 23060, US",
-      "postingDate": "10/03/2025, 12:24 PM",
-      "jobId": "10002481"
+      "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10003138",
+      "jobTitle": "Intern - Enterprise Analytics",
+      "description": "MidAmerican Energy Company is seeking a student pursuing a bachelor's degree program in data analytics, computer science, management information systems, mathematics, or related field of study. Enterprise Analytics interns will be exposed to a variety of projects and activities that occur within the energy industry. Interns will have the opportunity to apply their knowledge and skills learned through college and apply them to the workplace. The position is temporary, nonexempt, and full-time/hourly through the summer. \nCompany and Internship Program Overview\nMidAmerican Energy Company one of the largest renewable energy producers in the U.S is headquartered in Des Moines, Iowa, safely meeting the energy needs of more than 1.6 million customers in Iowa, Illinois, Nebraska, and South Dakota. A subsidiary of Berkshire Hathaway Energy, we have more than 3,400 dedicated employees serving our customers every day across our service territory.\nInterns will have the opportunity to participate in the annual three-day summer intern event in Des Moines, Iowa where they will have the opportunity to tour state-of-the-art facilities, network with leadership, and gain a broader understanding of MidAmerican Energy Company. Other panels, lunch and learns, and events will be happening throughout the summer to give our interns the best experience.",
+      "payRange": "20-26.00",
+      "location": "4299 NW Urbandale Dr, Urbandale, IA, 50322, US",
+      "postingDate": "10/17/2025, 10:49 AM",
+      "jobId": "10003138"
     },
     {
       "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10003779",
