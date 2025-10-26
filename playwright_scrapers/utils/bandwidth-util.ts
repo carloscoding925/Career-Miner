@@ -80,4 +80,8 @@ export class BandwidthTracker {
         console.log(`Response Body:       ${this.formatBytes(stats.breakdown.responseBody)}`);
         console.log('═══════════════════════════════════════\n'); 
     }
+
+    returnStats(): BandwidthStats {
+        return this.stats;
+    }
 }
