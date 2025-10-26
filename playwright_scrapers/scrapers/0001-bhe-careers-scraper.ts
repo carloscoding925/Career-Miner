@@ -9,9 +9,13 @@ import { FullJobDetails, JobMetaData, PostingCoverData, ScrapedData } from "../m
 import { CompanyNames } from "../models/company-names.js";
 import { createJobDetails, validateJobDetails } from "../utils/data-util.js";
 import { CompanyUrls } from "../models/companies.js";
+import { BandwidthTracker } from "../utils/bandwidth-util.js";
 
 async function scrapeBheCareers() {
     console.log("Running Scraper 0001 - BHE Careers");
+
+    // Init bandwidth tracking util
+    const bandwidthTracker = new BandwidthTracker();
 
     // Launch Browser
     const browser: Browser = await chromium.launch({
@@ -21,6 +25,10 @@ async function scrapeBheCareers() {
     // Browser and Scraper constants
     const context: BrowserContext = await browser.newContext();
     const page: Page = await context.newPage();
+
+    page.on('requestfinished', async (request) => {
+        await bandwidthTracker.trackRequest(request);
+    });
 
     try {
         // Page Navigation
@@ -175,6 +183,9 @@ async function scrapeBheCareers() {
     } catch (error) {
         console.log("Error Occured While Scraping: " + error);
     } finally {
+        bandwidthTracker.printSummary();
+        bandwidthTracker.reset();
+        
         await browser.close();
         console.log("\nFinished Running - Scraper 0001 - BHE Careers");
     }
