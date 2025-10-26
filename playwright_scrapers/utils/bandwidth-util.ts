@@ -1,4 +1,4 @@
-import { Page, Request, Response } from "playwright";
+import { CDPSession, Page, Request, Response } from "playwright";
 import { BandwidthStats } from "../models/bandwidth-usage.js";
 
 export function trackBandwidth(page: Page): BandwidthStats {
@@ -77,4 +77,44 @@ export function logBandwidthResults(stats: BandwidthStats): void {
     console.log(`Request Count: ${stats.requestCount}`);
     console.log(`Response Count: ${stats.responseCount}`);
     console.log(`Unreadable Responses: ${stats.unreadableResponses}`);
+}
+
+export async function trackBandwithViaCDP(page: Page): Promise<BandwidthStats> {
+    const client: CDPSession = await page.context().newCDPSession(page);
+    await client.send('Network.enable');
+
+    const stats: BandwidthStats = {
+        requestBytes: 0,
+        responseBytes: 0,
+        totalBytes: 0,
+        requestCount: 0,
+        responseCount: 0,
+        unreadableResponses: 0
+    };
+
+    client.on('Network.dataReceived', (params) => {
+        stats.responseBytes += params.dataLength;
+    });
+
+    client.on('Network.requestWillBeSent', (params) => {
+        stats.requestCount++;
+        
+        const request = params.request;
+        stats.requestBytes += JSON.stringify(request.headers).length;
+        if (request.postData) {
+            stats.requestBytes += request.postData.length;
+        }
+    });
+
+    client.on('Network.responseReceived', () => {
+        stats.responseCount++;
+    });
+
+    return stats;
+}
+
+export function calculateDifference(totalBytesOne: number, totalBytesTwo: number): void {
+    const difference: number = Math.abs(totalBytesOne - totalBytesTwo);
+    const percentDiff: string = (difference / totalBytesOne * 100).toFixed(2);
+    console.log(`Difference: ${(difference / 1024 / 1024).toFixed(2)} MB (${percentDiff}%)`);
 }
