@@ -9,8 +9,6 @@ import { FullJobDetails, JobMetaData, PostingCoverData, ScrapedData } from "../m
 import { CompanyNames } from "../models/company-names.js";
 import { createJobDetails, validateJobDetails } from "../utils/data-util.js";
 import { CompanyUrls } from "../models/companies.js";
-import { BandwidthStats } from "../models/bandwidth-usage.js";
-import { calculateDifference, logBandwidthResults, trackBandwidth, trackBandwithViaCDP } from "../utils/bandwidth-util.js";
 
 async function scrapeBheCareers() {
     console.log("Running Scraper 0001 - BHE Careers");
@@ -23,10 +21,6 @@ async function scrapeBheCareers() {
     // Browser and Scraper constants
     const context: BrowserContext = await browser.newContext();
     const page: Page = await context.newPage();
-
-    // Track bandwidth with both methods for verification
-    const bandwidthStats: BandwidthStats = trackBandwidth(page);
-    const cdpBandwidthStats: BandwidthStats = await trackBandwithViaCDP(page);
 
     try {
         // Page Navigation
@@ -181,15 +175,6 @@ async function scrapeBheCareers() {
     } catch (error) {
         console.log("Error Occured While Scraping: " + error);
     } finally {
-        console.log('\n========== MANUAL CALCULATION METHOD ==========');
-        logBandwidthResults(bandwidthStats);
-
-        console.log('\n========== CDP METHOD ==========');
-        logBandwidthResults(cdpBandwidthStats);
-
-        console.log('\n========== VERIFICATION ==========');
-        calculateDifference(bandwidthStats.totalBytes, cdpBandwidthStats.totalBytes);
-
         await browser.close();
         console.log("\nFinished Running - Scraper 0001 - BHE Careers");
     }
