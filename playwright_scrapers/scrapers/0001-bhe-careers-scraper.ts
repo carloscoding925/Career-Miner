@@ -33,7 +33,6 @@ async function scrapeBheCareers() {
     const page: Page = await context.newPage();
 
     // Resource Blocking and Data Usage
-    setupResourceBlocking(page);
     page.on('requestfinished', async (request) => {
         await bandwidthTracker.trackRequest(request);
     });
