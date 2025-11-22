@@ -2,27 +2,12 @@ import path from "path";
 import { fileURLToPath } from "url";
 import fs from 'fs/promises';
 import { spawn } from "child_process";
+import { ScraperConfig, ScraperResult } from "../models/scraper-config";
 
 const __filename: string = fileURLToPath(import.meta.url);
 const __dirname: string = path.dirname(__filename);
 
-interface ScraperConfig {
-    mode: 'sequential' | 'parallel';
-    concurrencyLimit?: number;
-    retryOnFailure?: boolean;
-    maxRetries?: number;
-    scraperFilter?: string[];
-}
-
-interface ScraperResult {
-    scraper: string;
-    success: boolean;
-    error?: string;
-    duration: number;
-    retries: number;
-}
-
-class ScraperOrchestrator {
+export class ScraperOrchestrator {
     private config: Required<ScraperConfig>;
     private results: ScraperResult[] = [];
 
@@ -197,29 +182,3 @@ class ScraperOrchestrator {
         this.printSummary(totalDuration);
     }
 }
-
-const sequentialConfig: ScraperConfig = {
-    mode: 'sequential',
-    retryOnFailure: true,
-    maxRetries: 2
-};
-
-const parallelConfig: ScraperConfig = {
-    mode: 'parallel',
-    concurrencyLimit: 2,
-    retryOnFailure: true,
-    maxRetries: 1
-};
-
-const filteredConfig: ScraperConfig = {
-    mode: 'sequential',
-    concurrencyLimit: 1,
-    retryOnFailure: false,
-    maxRetries: 0,
-    scraperFilter: ['0001', '0005']
-};
-
-const config: ScraperConfig = filteredConfig;
-const orchestrator = new ScraperOrchestrator(config);
-
-orchestrator.run().catch(console.error);

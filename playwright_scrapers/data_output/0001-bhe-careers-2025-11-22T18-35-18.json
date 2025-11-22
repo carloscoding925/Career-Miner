@@ -1,8 +1,8 @@
 {
     "companyName": "Berkshire Hathaway Energy",
-    "scrapedAt": "2025-11-22T04:33:47.623Z",
+    "scrapedAt": "2025-11-22T18:35:18.535Z",
     "searchTerm": "Information Technology",
-    "totalJobs": 19,
+    "totalJobs": 18,
     "jobs": [
         {
             "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10003622",
@@ -12,15 +12,6 @@
             "location": "1111 S 103rd St, Omaha, NE, 68124, US",
             "postingDate": "09/24/2025, 08:26 AM",
             "jobId": "10003622"
-        },
-        {
-            "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10003546",
-            "jobTitle": "Sr Systems Analyst",
-            "description": "Basic Purpose\nResponsible for maintaining systems and their associated operating systems for computer applications.  Conducts analysis, creates system specifications, develops, tests and implements operating systems. Utilizes existing or new technology in the automation of processes.  Evaluates software packages and provides recommendations to management.",
-            "payRange": "119,400-140,400",
-            "location": "6226 W Sahara Ave, Las Vegas, NV, 89146, US",
-            "postingDate": "11/19/2025, 12:35 PM",
-            "jobId": "10003546"
         },
         {
             "jobUrl": "https://fa-essf-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions/preview/10003914",

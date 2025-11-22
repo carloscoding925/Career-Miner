@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "scrape:execute": "node --loader ts-node/esm orchestrator/orchestrator.ts",
+    "scrape:execute": "node --loader ts-node/esm core/execute.ts",
     "scrape:test": "node --loader ts-node/esm scrapers/0005-citizenhealth-careers-scraper.ts"
   },
   "keywords": [],
