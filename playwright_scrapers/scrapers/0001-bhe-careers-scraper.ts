@@ -3,7 +3,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { getFilePrefix } from "../utils/naming-util.js";
 import { dataOutputDirectory, usageOutputDirectory } from "../constants/directories.js";
-import { departmentSearchTerm } from "../constants/search-terms.js";
+import { SEARCH_INFORMATION_TECHNOLOGY } from "../constants/search-terms.js";
 import { deleteOldFiles, writeNewFile } from "../utils/file-io-util.js";
 import { FullJobDetails, JobMetaData, PostingCoverData, ScrapedData } from "../models/data-storage.js";
 import { CompanyNames } from "../models/company-names.js";
@@ -45,8 +45,8 @@ async function scrapeBheCareers() {
 
         await page.waitForTimeout(3000);
 
-        console.log(`Entering Job Search Term: ${departmentSearchTerm}`);
-        await page.fill('#keyword-input', departmentSearchTerm);
+        console.log(`Entering Job Search Term: ${SEARCH_INFORMATION_TECHNOLOGY}`);
+        await page.fill('#keyword-input', SEARCH_INFORMATION_TECHNOLOGY);
         await page.press('#keyword-input', 'Enter');
 
         await page.waitForLoadState('load');
@@ -171,7 +171,7 @@ async function scrapeBheCareers() {
             const scrapedData: ScrapedData = {
                 companyName: CompanyNames.BHE,
                 scrapedAt: new Date().toISOString(),
-                searchTerm: departmentSearchTerm,
+                searchTerm: SEARCH_INFORMATION_TECHNOLOGY,
                 totalJobs: jobListings.length,
                 jobs: jobListings
             };

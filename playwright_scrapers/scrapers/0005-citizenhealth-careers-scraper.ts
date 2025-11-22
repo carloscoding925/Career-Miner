@@ -2,9 +2,11 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { getFilePrefix } from "../utils/naming-util.js";
 import { BandwidthTracker } from "../utils/bandwidth-util.js";
-import { Browser, BrowserContext, chromium, Page } from "playwright";
+import { Browser, BrowserContext, chromium, FrameLocator, Locator, Page } from "playwright";
 import { usageOutputDirectory } from "../constants/directories.js";
 import { deleteOldFiles, writeNewFile } from "../utils/file-io-util.js";
+import { CompanyUrls } from "../models/companies.js";
+import { SEARCH_ENGINEERING } from "../constants/search-terms.js";
 
 async function scrapeCitizenHealthCareers() {
     console.log("Running Scraper 0005 - Citizen Health Careers");
@@ -32,6 +34,29 @@ async function scrapeCitizenHealthCareers() {
     });
 
     try {
+        // Page Navigation
+        console.log("Navigating to Careers Page");
+        await page.goto(CompanyUrls.CITIZEN_HEALTH, {
+            waitUntil: "load"
+        });
+
+        console.log('Waiting for job board iframe to load...');
+
+        // First, scroll the iframe itself into view on the main page
+        const iframeElement: Locator = page.locator('iframe[title*="Ashby"], iframe[src*="ashby"]');
+        await iframeElement.waitFor({ state: 'visible', timeout: 10000 });
+        await iframeElement.scrollIntoViewIfNeeded();
+        await page.waitForTimeout(1000);
+        const iframe: FrameLocator = page.frameLocator('iframe[title*="Ashby"], iframe[src*="ashby"]');
+
+        console.log(`Filtering Job Listings by Department: ${SEARCH_ENGINEERING}`);
+
+        const departmentSelect = iframe.locator('select[name="departmentId"]');
+        await departmentSelect.waitFor({ state: 'visible', timeout: 10000 });
+        await departmentSelect.selectOption({ label: SEARCH_ENGINEERING });
+        await page.waitForTimeout(1500);
+
+        console.log('Successfully filtered jobs by department');
 
     } catch (error) {
         console.log("Error Occured While Scraping: " + error);
