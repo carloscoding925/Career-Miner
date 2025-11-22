@@ -87,8 +87,7 @@ class ScraperOrchestrator {
 
         return new Promise((resolve) => {
             const child = spawn('node', ['--loader', 'ts-node/esm', scraperPath], {
-                stdio: 'inherit',
-                shell: true
+                stdio: 'inherit'
             });
 
             child.on('close', async (code) => {
@@ -214,10 +213,13 @@ const parallelConfig: ScraperConfig = {
 
 const filteredConfig: ScraperConfig = {
     mode: 'sequential',
+    concurrencyLimit: 1,
+    retryOnFailure: false,
+    maxRetries: 0,
     scraperFilter: ['0001', '0005']
 };
 
-const config: ScraperConfig = sequentialConfig;
+const config: ScraperConfig = filteredConfig;
 const orchestrator = new ScraperOrchestrator(config);
 
 orchestrator.run().catch(console.error);

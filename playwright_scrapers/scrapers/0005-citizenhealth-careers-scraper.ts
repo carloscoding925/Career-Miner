@@ -1,10 +1,10 @@
 import path from "path";
 import { fileURLToPath } from "url";
-import { getFilePrefix } from "../utils/naming-util";
-import { BandwidthTracker } from "../utils/bandwidth-util";
+import { getFilePrefix } from "../utils/naming-util.js";
+import { BandwidthTracker } from "../utils/bandwidth-util.js";
 import { Browser, BrowserContext, chromium, Page } from "playwright";
-import { usageOutputDirectory } from "../constants/directories";
-import { deleteOldFiles, writeNewFile } from "../utils/file-io-util";
+import { usageOutputDirectory } from "../constants/directories.js";
+import { deleteOldFiles, writeNewFile } from "../utils/file-io-util.js";
 
 async function scrapeCitizenHealthCareers() {
     console.log("Running Scraper 0005 - Citizen Health Careers");
@@ -38,9 +38,11 @@ async function scrapeCitizenHealthCareers() {
     } finally {
         bandwidthTracker.printSummary();
 
+        /*
         const outputDir: string = path.join(__dirname, usageOutputDirectory);
         deleteOldFiles(outputDir, scraperPrefix);
         writeNewFile(outputDir, scraperPrefix, bandwidthTracker.returnStats());
+        */
 
         await browser.close();
         console.log("\n Finished Running - Scraper 0005 - Citizen Health Careers");
