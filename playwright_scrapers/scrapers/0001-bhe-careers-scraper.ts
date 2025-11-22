@@ -10,7 +10,6 @@ import { CompanyNames } from "../models/company-names.js";
 import { createJobDetails, validateJobDetails } from "../utils/data-util.js";
 import { CompanyUrls } from "../models/companies.js";
 import { BandwidthTracker } from "../utils/bandwidth-util.js";
-import { setupResourceBlocking } from "../utils/resource-block-util.js";
 
 async function scrapeBheCareers() {
     console.log("Running Scraper 0001 - BHE Careers");
