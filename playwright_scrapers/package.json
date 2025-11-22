@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "scrape:bhe": "node --loader ts-node/esm scrapers/0001-bhe-careers-scraper.ts"
+    "scrape:execute": "node --loader ts-node/esm orchestrator/orchestrator.ts",
+    "scrape:test": "node --loader ts-node/esm scrapers/0001-bhe-careers-scraper.ts"
   },
   "keywords": [],
   "author": "",
