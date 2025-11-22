@@ -20,7 +20,7 @@ async function scrapeBheCareers() {
     const scraperPrefix: string = getFilePrefix(__filename);
 
     // Init bandwidth tracking util
-    const bandwidthTracker = new BandwidthTracker();
+    const bandwidthTracker: BandwidthTracker = new BandwidthTracker();
 
     // Launch Browser
     const browser: Browser = await chromium.launch({
@@ -191,7 +191,7 @@ async function scrapeBheCareers() {
         writeNewFile(outputDir, scraperPrefix, bandwidthTracker.returnStats());
 
         await browser.close();
-        console.log("\nFinished Running - Scraper 0001 - BHE Careers");
+        console.log("\n Finished Running - Scraper 0001 - BHE Careers");
     }
 }
 
