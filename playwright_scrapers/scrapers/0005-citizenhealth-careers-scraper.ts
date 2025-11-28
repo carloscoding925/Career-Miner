@@ -3,11 +3,13 @@ import { fileURLToPath } from "url";
 import { getFilePrefix } from "../utils/naming-util.js";
 import { BandwidthTracker } from "../utils/bandwidth-util.js";
 import { Browser, BrowserContext, chromium, FrameLocator, Locator, Page } from "playwright";
-import { usageOutputDirectory } from "../constants/directories.js";
+import { dataOutputDirectory, usageOutputDirectory } from "../constants/directories.js";
 import { deleteOldFiles, writeNewFile } from "../utils/file-io-util.js";
 import { CompanyUrls } from "../models/companies.js";
 import { SEARCH_ENGINEERING } from "../constants/search-terms.js";
-import { FullJobDetails, PostingCoverData } from "../models/data-storage.js";
+import { FullJobDetails, PostingCoverData, ScrapedData } from "../models/data-storage.js";
+import { validateJobDetails } from "../utils/data-util.js";
+import { CompanyNames } from "../models/company-names.js";
 
 async function scrapeCitizenHealthCareers() {
     console.log("Running Scraper 0005 - Citizen Health Careers");
@@ -96,12 +98,12 @@ async function scrapeCitizenHealthCareers() {
                 await page.waitForTimeout(1000);
 
                 const leftPane: Locator = page.locator('._left_oj0x8_418.ashby-job-posting-left-pane');
-                await leftPane.waitFor({ state: 'visible', timeout: 10000 });
+                await leftPane.waitFor({ state: 'visible', timeout: 5000 });
 
                 // Extract location
                 let location: string = "";
-                const locationSection = leftPane.locator('._section_101oc_37').filter({ hasText: 'Location' }).first();
-                const locationCount = await locationSection.count();
+                const locationSection: Locator = leftPane.locator('._section_101oc_37').filter({ hasText: 'Location' }).first();
+                const locationCount: number = await locationSection.count();
 
                 if (locationCount > 0) {
                     location = await locationSection.locator('p').first().textContent() ?? "";
@@ -109,34 +111,29 @@ async function scrapeCitizenHealthCareers() {
 
                 // Extract pay range
                 let payRange: string = "";
-                const compensationSection = leftPane.locator('._section_101oc_37').filter({ hasText: 'Compensation' });
-                const compCount = await compensationSection.count();
+                const compensationSection: Locator = leftPane.locator('._section_101oc_37').filter({ hasText: 'Compensation' });
+                const compCount: number = await compensationSection.count();
 
                 if (compCount > 0) {
-                    const compSpan = compensationSection.locator('span._compensationTierSummary_oj0x8_327').first();
-                    const compSpanCount = await compSpan.count();
+                    const compSpan: Locator = compensationSection.locator('span._compensationTierSummary_oj0x8_327').first();
+                    const compSpanCount: number = await compSpan.count();
 
                     if (compSpanCount > 0) {
                         payRange = await compSpan.textContent({ timeout: 5000 }) ?? "";
                     }
                 }
 
-                console.log(`Location: ${location.trim()}`);
-                console.log(`Pay Range: ${payRange.trim() || 'Not specified'}`);
-
                 // Extract job description (The Role section only)
                 let description: string = "";
-                const descriptionContainer = page.locator('._descriptionText_oj0x8_198');
-                const descContainerCount = await descriptionContainer.count();
+                const descriptionContainer: Locator = page.locator('._descriptionText_oj0x8_198');
+                const descContainerCount: number = await descriptionContainer.count();
 
                 if (descContainerCount > 0) {
-                    // Extract "The Role" section
-                    const roleHeading = descriptionContainer.locator('h2:has-text("The Role")');
+                    const roleHeading: Locator = descriptionContainer.locator('h2:has-text("The Role")');
                     if (await roleHeading.count() > 0) {
-                        // Get paragraphs following the heading using evaluate
                         description = await roleHeading.evaluate((h2) => {
-                            let text = "";
-                            let sibling = h2.nextElementSibling;
+                            let text: string = "";
+                            let sibling: Element | null = h2.nextElementSibling;
                             while (sibling && sibling.tagName !== 'H2' && sibling.tagName !== 'H3') {
                                 if (sibling.tagName === 'P' && sibling.textContent?.trim()) {
                                     text += sibling.textContent.trim() + " ";
@@ -148,10 +145,7 @@ async function scrapeCitizenHealthCareers() {
                     }
                 }
 
-                console.log(`Description extracted: ${description.length} characters`);
-
-                // Store the job details
-                jobListings.push({
+                const jobDetails: FullJobDetails = {
                     jobUrl: job.jobUrl,
                     jobTitle: job.title,
                     description: description,
@@ -159,8 +153,16 @@ async function scrapeCitizenHealthCareers() {
                     location: location.trim(),
                     postingDate: "N/A",
                     jobId: "N/A"
-                });
+                };
+                const isValid: boolean = validateJobDetails(jobDetails);
 
+                if (!isValid) {
+                    console.log(`⚠ Invalid data for job: ${i + 1}/${jobUrls.length} - ${job.title}, skipping`);
+                    errorCount++;
+                    continue;
+                }
+
+                jobListings.push(jobDetails);
                 console.log(`✓ Successfully Scraped Job: ${job.title}`);
                 successCount++;
             } catch (error) {
@@ -169,28 +171,45 @@ async function scrapeCitizenHealthCareers() {
             }
         }
 
-        // Print summary
-        console.log('\n' + '='.repeat(50));
-        console.log('SCRAPING SUMMARY');
-        console.log('='.repeat(50));
-        console.log(`Total jobs found: ${jobUrls.length}`);
-        console.log(`Successfully scraped: ${successCount}`);
-        console.log(`Errors: ${errorCount}`);
-        console.log('='.repeat(50));
+        if (jobUrls.length === 0 || jobListings.length === 0) {
+            console.log("No Listings Found");
 
-        for (let i = 0; i < jobListings.length; i++) {
-            console.log(jobListings[i].description);
+            /*
+                Future Implementation - Connect to Slack/Discord to notify of potentially broken scraper or no Listings
+            */
+        }
+        else if (errorCount > 0) {
+            console.log(`Error Scraping Jobs - ${successCount} Successful Scrapes - ${errorCount} Unsuccessful Scrapes`);
+
+            /*
+                Future Implementation - Connect to Slack/Discord Channel to notify of failure
+            */
+        }
+        else {
+            console.log(`\nSuccessfully Scraped ${successCount} Jobs With ${errorCount} Errors`);
+
+            // Create Data JSON
+            const scrapedData: ScrapedData = {
+                companyName: CompanyNames.CITIZEN_HEALTH,
+                scrapedAt: new Date().toISOString(),
+                searchTerm: SEARCH_ENGINEERING,
+                totalJobs: jobListings.length,
+                jobs: jobListings
+            };
+
+            // Delete old output file and store new file
+            const outputDir: string = path.join(__dirname, dataOutputDirectory);
+            deleteOldFiles(outputDir, scraperPrefix);
+            writeNewFile(outputDir, scraperPrefix, scrapedData);
         }
     } catch (error) {
         console.log("Error Occured While Scraping: " + error);
     } finally {
         bandwidthTracker.printSummary();
 
-        /*
         const outputDir: string = path.join(__dirname, usageOutputDirectory);
         deleteOldFiles(outputDir, scraperPrefix);
         writeNewFile(outputDir, scraperPrefix, bandwidthTracker.returnStats());
-        */
 
         await browser.close();
         console.log("\n Finished Running - Scraper 0005 - Citizen Health Careers");
