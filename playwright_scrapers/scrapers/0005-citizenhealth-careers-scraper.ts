@@ -95,32 +95,70 @@ async function scrapeCitizenHealthCareers() {
                 await page.goto(job.jobUrl, { waitUntil: 'load' });
                 await page.waitForTimeout(1000);
 
-                const jobIframe: FrameLocator = page.frameLocator('iframe[title*="Ashby"], iframe[src*="ashby"]');
-                const leftPane: Locator = jobIframe.locator('._left_oj0x8_418.ashby-job-posting-left-pane');
-                await leftPane.waitFor({ state: 'visible', timeout: 5000 });
+                const leftPane: Locator = page.locator('._left_oj0x8_418.ashby-job-posting-left-pane');
+                await leftPane.waitFor({ state: 'visible', timeout: 10000 });
 
+                // Extract location
+                let location: string = "";
                 const locationSection = leftPane.locator('._section_101oc_37').filter({ hasText: 'Location' }).first();
-                const location: string = await locationSection.locator('p').textContent() ?? "";
+                const locationCount = await locationSection.count();
 
-                const compensationSection = leftPane.locator('._section_101oc_37').filter({ hasText: 'Compensation' });
+                if (locationCount > 0) {
+                    location = await locationSection.locator('p').first().textContent() ?? "";
+                }
+
+                // Extract pay range
                 let payRange: string = "";
+                const compensationSection = leftPane.locator('._section_101oc_37').filter({ hasText: 'Compensation' });
+                const compCount = await compensationSection.count();
 
-                if (await compensationSection.count() > 0) {
-                    payRange = await compensationSection.locator('p').textContent() ?? "";
+                if (compCount > 0) {
+                    const compSpan = compensationSection.locator('span._compensationTierSummary_oj0x8_327').first();
+                    const compSpanCount = await compSpan.count();
+
+                    if (compSpanCount > 0) {
+                        payRange = await compSpan.textContent({ timeout: 5000 }) ?? "";
+                    }
                 }
 
                 console.log(`Location: ${location.trim()}`);
                 console.log(`Pay Range: ${payRange.trim() || 'Not specified'}`);
 
+                // Extract job description (The Role section only)
+                let description: string = "";
+                const descriptionContainer = page.locator('._descriptionText_oj0x8_198');
+                const descContainerCount = await descriptionContainer.count();
+
+                if (descContainerCount > 0) {
+                    // Extract "The Role" section
+                    const roleHeading = descriptionContainer.locator('h2:has-text("The Role")');
+                    if (await roleHeading.count() > 0) {
+                        // Get paragraphs following the heading using evaluate
+                        description = await roleHeading.evaluate((h2) => {
+                            let text = "";
+                            let sibling = h2.nextElementSibling;
+                            while (sibling && sibling.tagName !== 'H2' && sibling.tagName !== 'H3') {
+                                if (sibling.tagName === 'P' && sibling.textContent?.trim()) {
+                                    text += sibling.textContent.trim() + " ";
+                                }
+                                sibling = sibling.nextElementSibling;
+                            }
+                            return text.trim();
+                        });
+                    }
+                }
+
+                console.log(`Description extracted: ${description.length} characters`);
+
                 // Store the job details
                 jobListings.push({
                     jobUrl: job.jobUrl,
                     jobTitle: job.title,
-                    description: "", // To be extracted later
+                    description: description,
                     payRange: payRange.trim(),
                     location: location.trim(),
-                    postingDate: "", // To be extracted later
-                    jobId: "" // To be extracted later
+                    postingDate: "N/A",
+                    jobId: "N/A"
                 });
 
                 console.log(`✓ Successfully Scraped Job: ${job.title}`);
@@ -139,6 +177,10 @@ async function scrapeCitizenHealthCareers() {
         console.log(`Successfully scraped: ${successCount}`);
         console.log(`Errors: ${errorCount}`);
         console.log('='.repeat(50));
+
+        for (let i = 0; i < jobListings.length; i++) {
+            console.log(jobListings[i].description);
+        }
     } catch (error) {
         console.log("Error Occured While Scraping: " + error);
     } finally {
