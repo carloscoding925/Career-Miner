@@ -8,6 +8,7 @@ import { deleteOldFiles, writeNewFile } from "../utils/file-io-util.js";
 import { CompanyUrls } from "../models/companies.js";
 import { SEARCH_ENGINEERING, SEARCH_QUANTITATIVE_RESEARCH } from "../constants/search-terms.js";
 import { FILTER_AMERICAS } from "../constants/filters.js";
+import { FullJobDetails, PostingCoverData } from "../models/data-storage.js";
 
 async function scrapeCitadelCareers() {
     console.log("Running Scraper 0010 - Citadel Careers");
@@ -56,7 +57,67 @@ async function scrapeCitadelCareers() {
         await page.locator(`input[value="${FILTER_AMERICAS.toLowerCase()}"]`).check();
 
         await page.waitForTimeout(3000);
-        
+
+        // Extract Job Listings from all pages
+        console.log("Extracting Job Listings");
+        const jobUrls: PostingCoverData[] = [];
+        let currentPage: number = 1;
+
+        while (true) {
+            console.log(`\nProcessing page ${currentPage}...`);
+
+            const jobCards: Locator = page.locator('a.careers-listing-card');
+            const jobCount: number = await jobCards.count();
+            console.log(`Found ${jobCount} job listings on page ${currentPage}`);
+
+            for (let i = 0; i < jobCount; i++) {
+                const card: Locator = jobCards.nth(i);
+                const title: string = await card.locator('.careers-listing-card__title h2').textContent() ?? "";
+                const url: string = await card.getAttribute('href') ?? "";
+
+                jobUrls.push({
+                    title: title.trim(),
+                    jobUrl: url
+                });
+            }
+
+            const nextButton: Locator = page.locator('div.is-desktop span.btn-next');
+            const nextButtonExists: boolean = await nextButton.count() > 0;
+
+            if (!nextButtonExists) {
+                console.log("\nReached last page - no more results");
+                break;
+            }
+
+            console.log("Navigating to next page...");
+            const nextLink: Locator = page.locator('div.is-desktop a.next.page-numbers');
+            await nextLink.click();
+            await page.waitForLoadState('load');
+            await page.waitForTimeout(2000);
+
+            currentPage++;
+        }
+        console.log(`\nTotal job listings extracted: ${jobUrls.length}`);
+
+        // Extract rest of available data from job listings
+        const jobListings: FullJobDetails[] = [];
+        let errorCount: number = 0;
+        let successCount: number = 0;
+
+        for (let i = 0; i < jobUrls.length; i++) {
+            const job: PostingCoverData = jobUrls[i];
+            console.log(`\nScraping Job ${i + 1}/${jobUrls.length}: ${job.title}`);
+
+            try {
+                await page.goto(job.jobUrl, { waitUntil: 'load' });
+
+                console.log(`✓ Successfully Scraped Job: ${job.title}`);
+                successCount++;
+            } catch (error) {
+                console.error(`✗ Error scraping ${job.title}:`, error);
+                errorCount++;
+            }
+        }
     } catch (error) {
         console.log("Error Occured While Scraping: " + error);
     } finally {
