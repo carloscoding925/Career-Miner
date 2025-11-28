@@ -3,13 +3,14 @@ import { fileURLToPath } from "url";
 import { getFilePrefix } from "../utils/naming-util.js";
 import { BandwidthTracker } from "../utils/bandwidth-util.js";
 import { Browser, BrowserContext, chromium, Locator, Page } from "playwright";
-import { usageOutputDirectory } from "../constants/directories.js";
+import { dataOutputDirectory, usageOutputDirectory } from "../constants/directories.js";
 import { deleteOldFiles, writeNewFile } from "../utils/file-io-util.js";
 import { CompanyUrls } from "../models/companies.js";
 import { SEARCH_ENGINEERING, SEARCH_QUANTITATIVE_RESEARCH } from "../constants/search-terms.js";
 import { FILTER_AMERICAS } from "../constants/filters.js";
-import { FullJobDetails, PostingCoverData } from "../models/data-storage.js";
+import { FullJobDetails, PostingCoverData, ScrapedData } from "../models/data-storage.js";
 import { validateJobDetails } from "../utils/data-util.js";
+import { CompanyNames } from "../models/company-names.js";
 
 async function scrapeCitadelCareers() {
     console.log("Running Scraper 0010 - Citadel Careers");
@@ -149,16 +150,45 @@ async function scrapeCitadelCareers() {
                 errorCount++;
             }
         }
+
+        if (jobUrls.length === 0 || jobListings.length === 0) {
+            console.log("No Listings Found");
+
+            /*
+                Future Implementation - Connect to Slack/Discord to notify of potentially broken scraper or no Listings
+            */
+        }
+        else if (errorCount > 0) {
+            console.log(`Error Scraping Jobs - ${successCount} Successful Scrapes - ${errorCount} Unsuccessful Scrapes`);
+
+            /*
+                Future Implementation - Connect to Slack/Discord Channel to notify of failure
+            */
+        }
+        else {
+            console.log(`\nSuccessfully Scraped ${successCount} Jobs With ${errorCount} Errors`);
+
+            // Create Data JSON
+            const scrapedData: ScrapedData = {
+                companyName: CompanyNames.CITADEL,
+                scrapedAt: new Date().toISOString(),
+                searchTerm: `${SEARCH_ENGINEERING} - ${SEARCH_QUANTITATIVE_RESEARCH}`,
+                totalJobs: jobListings.length,
+                jobs: jobListings
+            };
+
+            const outputDir: string = path.join(__dirname, dataOutputDirectory);
+            deleteOldFiles(outputDir, scraperPrefix);
+            writeNewFile(outputDir, scraperPrefix, scrapedData);
+        }
     } catch (error) {
         console.log("Error Occured While Scraping: " + error);
     } finally {
         bandwidthTracker.printSummary();
 
-        /*
         const outputDir: string = path.join(__dirname, usageOutputDirectory);
         deleteOldFiles(outputDir, scraperPrefix);
         writeNewFile(outputDir, scraperPrefix, bandwidthTracker.returnStats());
-        */
 
         await browser.close();
         console.log("\n Finished Running - Scraper 0010 - Citadel Careers");
