@@ -1,5 +1,6 @@
 import { ScraperConfig } from "../models/scraper-config.js";
 import { ScraperOrchestrator } from "./orchestrator.js";
+import 'dotenv/config';
 
 const sequentialConfig: ScraperConfig = {
     mode: 'sequential',
@@ -19,7 +20,7 @@ const filteredConfig: ScraperConfig = {
     concurrencyLimit: 1,
     retryOnFailure: false,
     maxRetries: 0,
-    scraperFilter: ['0001', '0005']
+    scraperFilter: ['0010']
 };
 
 const config: ScraperConfig = filteredConfig;

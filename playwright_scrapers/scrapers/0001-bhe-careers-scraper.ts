@@ -24,7 +24,7 @@ async function scrapeBheCareers() {
 
     // Launch Browser
     const browser: Browser = await chromium.launch({
-        headless: false // False to Open Browser, True to Run in Background
+        headless: process.env.HEADLESS === 'true'
     });
 
     // Browser and Scraper constants

@@ -24,7 +24,7 @@ async function scrapeCitizenHealthCareers() {
 
     // Launch Browser
     const browser: Browser = await chromium.launch({
-        headless: false
+        headless: process.env.HEADLESS === 'true'
     });
 
     // Browser and Scraper constants
