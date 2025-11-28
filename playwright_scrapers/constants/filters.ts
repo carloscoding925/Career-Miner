@@ -1,1 +1,1 @@
-export const CONTINENT: string = 'Americas';
+export const FILTER_AMERICAS: string = 'Americas';

@@ -2,9 +2,12 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { getFilePrefix } from "../utils/naming-util.js";
 import { BandwidthTracker } from "../utils/bandwidth-util.js";
-import { Browser, BrowserContext, chromium, Page } from "playwright";
+import { Browser, BrowserContext, chromium, Locator, Page } from "playwright";
 import { usageOutputDirectory } from "../constants/directories.js";
 import { deleteOldFiles, writeNewFile } from "../utils/file-io-util.js";
+import { CompanyUrls } from "../models/companies.js";
+import { SEARCH_ENGINEERING, SEARCH_QUANTITATIVE_RESEARCH } from "../constants/search-terms.js";
+import { FILTER_AMERICAS } from "../constants/filters.js";
 
 async function scrapeCitadelCareers() {
     console.log("Running Scraper 0010 - Citadel Careers");
@@ -25,14 +28,35 @@ async function scrapeCitadelCareers() {
     const context: BrowserContext = await browser.newContext();
     const page: Page = await browser.newPage();
 
-    page.on('requestfinished', async(request) => {
+    page.on('requestfinished', async (request) => {
         await bandwidthTracker.trackRequest(request);
     });
 
     try {
         // Page Navigation
         console.log("Navigating to Careers Page");
+        await page.goto(CompanyUrls.CITADEL, {
+            waitUntil: 'load'
+        });
 
+        await page.waitForTimeout(3000);
+
+        const button: Locator = page.locator('a.button[href="/careers/open-opportunities/"]').first();
+        await button.waitFor({ state: 'visible', timeout: 5000 });
+        await button.click();
+        await page.waitForLoadState('load');
+
+        await page.waitForTimeout(3000);
+
+        // Filter Jobs
+        console.log(`Filtering Job Listings by Roles: ${SEARCH_QUANTITATIVE_RESEARCH} and ${SEARCH_ENGINEERING}`);
+        console.log(`Filtering Job Listings by Location: ${FILTER_AMERICAS}`);
+        await page.locator(`input[value="${SEARCH_ENGINEERING.toLowerCase()}"]`).check();
+        await page.locator(`input[value="${SEARCH_QUANTITATIVE_RESEARCH.toLowerCase()}"]`).check();
+        await page.locator(`input[value="${FILTER_AMERICAS.toLowerCase()}"]`).check();
+
+        await page.waitForTimeout(3000);
+        
     } catch (error) {
         console.log("Error Occured While Scraping: " + error);
     } finally {
