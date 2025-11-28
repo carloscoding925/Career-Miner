@@ -9,6 +9,7 @@ import { CompanyUrls } from "../models/companies.js";
 import { SEARCH_ENGINEERING, SEARCH_QUANTITATIVE_RESEARCH } from "../constants/search-terms.js";
 import { FILTER_AMERICAS } from "../constants/filters.js";
 import { FullJobDetails, PostingCoverData } from "../models/data-storage.js";
+import { validateJobDetails } from "../utils/data-util.js";
 
 async function scrapeCitadelCareers() {
     console.log("Running Scraper 0010 - Citadel Careers");
@@ -110,7 +111,37 @@ async function scrapeCitadelCareers() {
 
             try {
                 await page.goto(job.jobUrl, { waitUntil: 'load' });
+                await page.waitForTimeout(1000);
 
+                const locationElement: Locator = page.locator('.single-job-application__title-inner p');
+                const location: string = await locationElement.textContent() ?? "";
+
+                const salaryElement: Locator = page.locator('div.text i:has-text("In accordance with applicable law")');
+                const salary: string = await salaryElement.first().textContent() ?? "";
+
+                const textContainer: Locator = page.locator('div.text');
+                const fullText: string = await textContainer.innerHTML() ?? "";
+                const jobDescMatch: RegExpMatchArray | null = fullText.match(/<h2[^>]*>.*?Job Description.*?<\/h2>(.*?)<h2[^>]*>.*?About Citadel.*?<\/h2>/s);
+                const description: string = jobDescMatch ? jobDescMatch[1].trim() : "";
+
+                const jobDetails: FullJobDetails = {
+                    jobUrl: job.jobUrl,
+                    jobTitle: job.title,
+                    description: description,
+                    payRange: salary,
+                    location: location,
+                    postingDate: "N/A",
+                    jobId: "N/A"
+                }
+                const isValid: boolean = validateJobDetails(jobDetails);
+
+                if (!isValid) {
+                    console.log(`⚠ Invalid data for job: ${i + 1}/${jobUrls.length} - ${job.title}, skipping`);
+                    errorCount++;
+                    continue;
+                }
+
+                jobListings.push(jobDetails);
                 console.log(`✓ Successfully Scraped Job: ${job.title}`);
                 successCount++;
             } catch (error) {
