@@ -39,7 +39,37 @@ async function scrapeJaneStreetCareers() {
         });
 
         await page.waitForTimeout(3000);
-        
+
+        // Extract URLs for both career pages
+        console.log("Extracting career page URLs");
+
+        // Scroll to make the buttons visible
+        await page.locator('.open-roles-cards-container').scrollIntoViewIfNeeded();
+        await page.waitForTimeout(1000);
+
+        const experiencedUrl: string = await page.locator('.open-roles-card-experienced').getAttribute('href') ?? "";
+        const newGradUrl: string = await page.locator('.open-roles-card-students').getAttribute('href') ?? "";
+
+        if (experiencedUrl === "" || newGradUrl === "") {
+            throw new Error("Failed to extract career page URLs");
+        }
+
+        const baseUrl: string = 'https://www.janestreet.com';
+        const experiencedFullUrl: string = baseUrl + experiencedUrl;
+        const newGradFullUrl: string = baseUrl + newGradUrl;
+
+        // Scrape Experienced Candidates page
+        console.log("\nScraping Experienced Candidates page...");
+        await page.goto(experiencedFullUrl, { waitUntil: 'load' });
+        await page.waitForTimeout(2000);
+        // TODO: Add scraping logic for experienced candidates
+
+        // Scrape Students/New Grads page
+        console.log("\nScraping Students/New Grads page...");
+        await page.goto(newGradFullUrl, { waitUntil: 'load' });
+        await page.waitForTimeout(2000);
+        // TODO: Add scraping logic for students/new grads
+
     } catch (error) {
         console.log("Error Occured While Scraping: " + error);
     } finally {
