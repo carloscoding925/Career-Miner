@@ -2,7 +2,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { getFilePrefix } from "../utils/naming-util.js";
 import { BandwidthTracker } from "../utils/bandwidth-util.js";
-import { Browser, BrowserContext, chromium, Page } from "playwright";
+import { Browser, BrowserContext, chromium, Locator, Page } from "playwright";
 import { usageOutputDirectory } from "../constants/directories.js";
 import { deleteOldFiles, writeNewFile } from "../utils/file-io-util";
 import { CompanyUrls } from "../models/companies.js";
@@ -61,31 +61,78 @@ async function scrapeJaneStreetCareers() {
         const experiencedFullUrl: string = baseUrl + experiencedUrl;
         const newGradFullUrl: string = baseUrl + newGradUrl;
 
-        // Scrape Experienced Candidates page
-        const experiencedJobUrls: PostingCoverData[] = [];
+        // Extract Job Listings from both Experienced and New Grad posting pages
+        const jobUrls: PostingCoverData[] = [];
 
+        // Scrape Experienced Candidates page
         console.log("\nScraping Experienced Candidates page...");
         await page.goto(experiencedFullUrl, { waitUntil: 'load' });
         await page.waitForTimeout(3000);
 
         console.log(`Filtering Experienced Job Listings by Roles: ${SEARCH_JANE_STREET} and ${SEARCH_TECHNOLOGY}`);
         console.log(`Filtering Job Listings by Location: ${FILTER_NEW_YORK}`);
+
+        // Scroll to make dropdowns visible
+        await page.locator('.dropdowns-list').first().scrollIntoViewIfNeeded();
+        await page.waitForTimeout(1000);
+
         await page.selectOption('.location-select', FILTER_NEW_YORK);
         await page.selectOption('.department-select', SEARCH_JANE_STREET);
         await page.waitForTimeout(3000);
 
-        // Scrape Students/New Grads page
-        const newGradJobUrls: PostingCoverData[] = [];
+        // Extract all job postings
+        const experiencedJobLinks: Locator[] = await page.locator('.jobs-container a').all();
+        console.log(`\n Found ${experiencedJobLinks.length} jobs under the Experienced Category`);
 
+        for (const link of experiencedJobLinks) {
+            const href: string | null = await link.getAttribute('href');
+            const titleElement: string | null = await link.locator('.item.experienced.position p').textContent();
+
+            if (href && titleElement) {
+                jobUrls.push({
+                    title: titleElement.trim(),
+                    jobUrl: baseUrl + href
+                });
+            }
+        }
+
+        // Scrape Students/New Grads page
         console.log("\nScraping Students/New Grads page...");
         await page.goto(newGradFullUrl, { waitUntil: 'load' });
         await page.waitForTimeout(3000);
 
         console.log(`Filtering New Grad Job Listings by Roles: ${SEARCH_JANE_STREET} and ${SEARCH_TECHNOLOGY}`);
         console.log(`Filtering Job Listings by Location: ${FILTER_NEW_YORK}`);
-        await page.selectOption('.location-select', FILTER_NEW_YORK);
-        await page.selectOption('.department-select', SEARCH_JANE_STREET);
+
+        // Scroll the page to make dropdowns visible
+        // Note: There are multiple select elements on the page, we use .last() to target the visible one
+        await page.evaluate(() => {
+            window.scrollTo(0, 400);
+        });
+        await page.waitForTimeout(1500);
+
+        // Use .last() to get the visible select element
+        await page.locator('.location-select').last().selectOption(FILTER_NEW_YORK);
+        await page.locator('.department-select').last().selectOption(SEARCH_JANE_STREET);
         await page.waitForTimeout(3000);
+
+        // Extract all job postings
+        const newGradJobLinks: Locator[] = await page.locator('.jobs-container a').all();
+        console.log(`Found ${newGradJobLinks.length} jobs under the New Grad Category`);
+
+        for (const link of newGradJobLinks) {
+            const href: string | null = await link.getAttribute('href');
+            const titleElement: string | null = await link.locator('.item.students-and-new-grads.position p').textContent();
+
+            if (href && titleElement) {
+                jobUrls.push({
+                    title: titleElement.trim(),
+                    jobUrl: baseUrl + href
+                });
+            }
+        }
+
+        console.log(`Found ${jobUrls.length} jobs`);
     } catch (error) {
         console.log("Error Occured While Scraping: " + error);
     } finally {
