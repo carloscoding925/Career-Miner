@@ -104,14 +104,11 @@ async function scrapeJaneStreetCareers() {
         console.log(`Filtering New Grad Job Listings by Roles: ${SEARCH_JANE_STREET} and ${SEARCH_TECHNOLOGY}`);
         console.log(`Filtering Job Listings by Location: ${FILTER_NEW_YORK}`);
 
-        // Scroll the page to make dropdowns visible
-        // Note: There are multiple select elements on the page, we use .last() to target the visible one
         await page.evaluate(() => {
             window.scrollTo(0, 400);
         });
         await page.waitForTimeout(1500);
 
-        // Use .last() to get the visible select element
         await page.locator('.location-select').last().selectOption(FILTER_NEW_YORK);
         await page.locator('.department-select').last().selectOption(SEARCH_JANE_STREET);
         await page.waitForTimeout(3000);
@@ -132,7 +129,12 @@ async function scrapeJaneStreetCareers() {
             }
         }
 
-        console.log(`Found ${jobUrls.length} jobs`);
+        // Deduplicate jobs based on jobUrl
+        const uniqueJobs: PostingCoverData[] = Array.from(
+            new Map(jobUrls.map(job => [job.jobUrl, job])).values()
+        );
+
+        console.log(`\n Found ${uniqueJobs.length} unique jobs (${jobUrls.length} total before deduplication)`);
     } catch (error) {
         console.log("Error Occured While Scraping: " + error);
     } finally {
