@@ -133,7 +133,7 @@ async function scrapeJaneStreetCareers() {
 
         // Extract all job postings
         const newGradQuantJobLinks: Locator[] = await page.locator('.jobs-container a').all();
-        console.log(`Found ${newGradQuantJobLinks.length} jobs under the ${SEARCH_JANE_STREET} New Grad Category`);
+        console.log(`\n Found ${newGradQuantJobLinks.length} jobs under the ${SEARCH_JANE_STREET} New Grad Category`);
 
         for (const link of newGradQuantJobLinks) {
             const href: string | null = await link.getAttribute('href');
