@@ -8,7 +8,7 @@ import { deleteOldFiles, writeNewFile } from "../utils/file-io-util";
 import { CompanyUrls } from "../models/companies.js";
 import { SEARCH_JANE_STREET, SEARCH_TECHNOLOGY } from "../constants/search-terms.js";
 import { FILTER_NEW_YORK } from "../constants/filters.js";
-import { PostingCoverData } from "../models/data-storage.js";
+import { FullJobDetails, PostingCoverData } from "../models/data-storage.js";
 
 async function scrapeJaneStreetCareers() {
     console.log("Running Scraper 0009 - Jane Street Careers");
@@ -171,6 +171,28 @@ async function scrapeJaneStreetCareers() {
         );
 
         console.log(`\n Found ${uniqueJobs.length} unique jobs (${jobUrls.length} total before deduplication)`);
+
+        const jobListings: FullJobDetails[] = [];
+        let errorCount: number = 0;
+        let successCount: number = 0;
+
+        for (let i = 0; i < uniqueJobs.length; i++) {
+            const job: PostingCoverData = uniqueJobs[i];
+            console.log(`\nScraping Job ${i + 1}/${uniqueJobs.length}: ${job.title}`);
+
+            try {
+                await page.goto(job.jobUrl, { waitUntil: 'load' });
+                await page.waitForTimeout(1000);
+
+                //TO-DO: Add remaining scraper logic here
+
+                console.log(`✓ Successfully Scraped Job: ${job.title}`);
+                successCount++;
+            } catch (error) {
+                console.error(`✗ Error scraping ${job.title}:`, error);
+                errorCount++;
+            }
+        }
     } catch (error) {
         console.log("Error Occured While Scraping: " + error);
     } finally {
