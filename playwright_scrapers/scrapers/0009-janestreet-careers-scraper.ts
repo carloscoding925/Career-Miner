@@ -6,6 +6,9 @@ import { Browser, BrowserContext, chromium, Page } from "playwright";
 import { usageOutputDirectory } from "../constants/directories.js";
 import { deleteOldFiles, writeNewFile } from "../utils/file-io-util";
 import { CompanyUrls } from "../models/companies.js";
+import { SEARCH_JANE_STREET, SEARCH_TECHNOLOGY } from "../constants/search-terms.js";
+import { FILTER_NEW_YORK } from "../constants/filters.js";
+import { PostingCoverData } from "../models/data-storage.js";
 
 async function scrapeJaneStreetCareers() {
     console.log("Running Scraper 0009 - Jane Street Careers");
@@ -59,17 +62,30 @@ async function scrapeJaneStreetCareers() {
         const newGradFullUrl: string = baseUrl + newGradUrl;
 
         // Scrape Experienced Candidates page
+        const experiencedJobUrls: PostingCoverData[] = [];
+
         console.log("\nScraping Experienced Candidates page...");
         await page.goto(experiencedFullUrl, { waitUntil: 'load' });
-        await page.waitForTimeout(2000);
-        // TODO: Add scraping logic for experienced candidates
+        await page.waitForTimeout(3000);
+
+        console.log(`Filtering Experienced Job Listings by Roles: ${SEARCH_JANE_STREET} and ${SEARCH_TECHNOLOGY}`);
+        console.log(`Filtering Job Listings by Location: ${FILTER_NEW_YORK}`);
+        await page.selectOption('.location-select', FILTER_NEW_YORK);
+        await page.selectOption('.department-select', SEARCH_JANE_STREET);
+        await page.waitForTimeout(3000);
 
         // Scrape Students/New Grads page
+        const newGradJobUrls: PostingCoverData[] = [];
+
         console.log("\nScraping Students/New Grads page...");
         await page.goto(newGradFullUrl, { waitUntil: 'load' });
-        await page.waitForTimeout(2000);
-        // TODO: Add scraping logic for students/new grads
+        await page.waitForTimeout(3000);
 
+        console.log(`Filtering New Grad Job Listings by Roles: ${SEARCH_JANE_STREET} and ${SEARCH_TECHNOLOGY}`);
+        console.log(`Filtering Job Listings by Location: ${FILTER_NEW_YORK}`);
+        await page.selectOption('.location-select', FILTER_NEW_YORK);
+        await page.selectOption('.department-select', SEARCH_JANE_STREET);
+        await page.waitForTimeout(3000);
     } catch (error) {
         console.log("Error Occured While Scraping: " + error);
     } finally {
