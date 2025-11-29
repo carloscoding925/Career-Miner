@@ -81,10 +81,28 @@ async function scrapeJaneStreetCareers() {
         await page.waitForTimeout(3000);
 
         // Extract all job postings
-        const experiencedJobLinks: Locator[] = await page.locator('.jobs-container a').all();
-        console.log(`\n Found ${experiencedJobLinks.length} jobs under the Experienced Category`);
+        const experiencedQuantJobLinks: Locator[] = await page.locator('.jobs-container a').all();
+        console.log(`\n Found ${experiencedQuantJobLinks.length} jobs under the ${SEARCH_JANE_STREET} Experienced Category`);
 
-        for (const link of experiencedJobLinks) {
+        for (const link of experiencedQuantJobLinks) {
+            const href: string | null = await link.getAttribute('href');
+            const titleElement: string | null = await link.locator('.item.experienced.position p').textContent();
+
+            if (href && titleElement) {
+                jobUrls.push({
+                    title: titleElement.trim(),
+                    jobUrl: baseUrl + href
+                });
+            }
+        }
+
+        await page.selectOption('.department-select', SEARCH_TECHNOLOGY);
+        await page.waitForTimeout(3000);
+
+        const experiencedTechJobLinks: Locator[] = await page.locator('.jobs-container a').all();
+        console.log(`\n Found ${experiencedTechJobLinks.length} jobs under the ${SEARCH_TECHNOLOGY} Experienced Category`);
+
+        for (const link of experiencedTechJobLinks) {
             const href: string | null = await link.getAttribute('href');
             const titleElement: string | null = await link.locator('.item.experienced.position p').textContent();
 
@@ -114,10 +132,28 @@ async function scrapeJaneStreetCareers() {
         await page.waitForTimeout(3000);
 
         // Extract all job postings
-        const newGradJobLinks: Locator[] = await page.locator('.jobs-container a').all();
-        console.log(`Found ${newGradJobLinks.length} jobs under the New Grad Category`);
+        const newGradQuantJobLinks: Locator[] = await page.locator('.jobs-container a').all();
+        console.log(`Found ${newGradQuantJobLinks.length} jobs under the ${SEARCH_JANE_STREET} New Grad Category`);
 
-        for (const link of newGradJobLinks) {
+        for (const link of newGradQuantJobLinks) {
+            const href: string | null = await link.getAttribute('href');
+            const titleElement: string | null = await link.locator('.item.students-and-new-grads.position p').textContent();
+
+            if (href && titleElement) {
+                jobUrls.push({
+                    title: titleElement.trim(),
+                    jobUrl: baseUrl + href
+                });
+            }
+        }
+
+        await page.locator('.department-select').last().selectOption(SEARCH_TECHNOLOGY);
+        await page.waitForTimeout(3000);
+
+        const newGradTechJobLinks: Locator[] = await page.locator('.jobs-container a').all();
+        console.log(`\n Found ${newGradTechJobLinks.length} jobs under the ${SEARCH_TECHNOLOGY} New Grad Category`);
+
+        for (const link of newGradTechJobLinks) {
             const href: string | null = await link.getAttribute('href');
             const titleElement: string | null = await link.locator('.item.students-and-new-grads.position p').textContent();
 
