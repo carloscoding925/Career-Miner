@@ -3,12 +3,14 @@ import { fileURLToPath } from "url";
 import { getFilePrefix } from "../utils/naming-util.js";
 import { BandwidthTracker } from "../utils/bandwidth-util.js";
 import { Browser, BrowserContext, chromium, Locator, Page } from "playwright";
-import { usageOutputDirectory } from "../constants/directories.js";
-import { deleteOldFiles, writeNewFile } from "../utils/file-io-util";
+import { dataOutputDirectory, usageOutputDirectory } from "../constants/directories.js";
+import { deleteOldFiles, writeNewFile } from "../utils/file-io-util.js";
 import { CompanyUrls } from "../models/companies.js";
 import { SEARCH_JANE_STREET, SEARCH_TECHNOLOGY } from "../constants/search-terms.js";
 import { FILTER_NEW_YORK } from "../constants/filters.js";
-import { FullJobDetails, PostingCoverData } from "../models/data-storage.js";
+import { FullJobDetails, PostingCoverData, ScrapedData } from "../models/data-storage.js";
+import { validateJobDetails } from "../utils/data-util.js";
+import { CompanyNames } from "../models/company-names.js";
 
 async function scrapeJaneStreetCareers() {
     console.log("Running Scraper 0009 - Jane Street Careers");
@@ -184,8 +186,36 @@ async function scrapeJaneStreetCareers() {
                 await page.goto(job.jobUrl, { waitUntil: 'load' });
                 await page.waitForTimeout(1000);
 
-                //TO-DO: Add remaining scraper logic here
+                const location: string = await page.locator('p.name.city').textContent() ?? "";
 
+                const descriptionElement = await page.locator('.col-12').first();
+                const description: string = await descriptionElement.textContent() ?? "";
+
+                const salaryExists: boolean = await page.locator('.salary-range-disclosure').count() > 0;
+                let salaryText: string = "N/A"
+
+                if (salaryExists) {
+                    salaryText = await page.locator('.salary-range-disclosure').textContent() ?? "";
+                }
+
+                const jobDetails: FullJobDetails = {
+                    jobUrl: job.jobUrl,
+                    jobTitle: job.title,
+                    description: description,
+                    payRange: salaryText,
+                    location: location,
+                    postingDate: "N/A",
+                    jobId: "N/A"
+                };
+                const isValid: boolean = validateJobDetails(jobDetails);
+
+                if (!isValid) {
+                    console.log(`⚠ Invalid data for job: ${i + 1}/${jobUrls.length} - ${job.title}, skipping`);
+                    errorCount++;
+                    continue;
+                }
+
+                jobListings.push(jobDetails);
                 console.log(`✓ Successfully Scraped Job: ${job.title}`);
                 successCount++;
             } catch (error) {
@@ -193,16 +223,44 @@ async function scrapeJaneStreetCareers() {
                 errorCount++;
             }
         }
+
+        if (uniqueJobs.length === 0 || jobListings.length === 0) {
+            console.log("No Listings Found");
+
+            /*
+                Future Implementation - Connect to Slack/Discord to notify of potentially broken scraper or no Listings
+            */
+        }
+        else if (errorCount > 0) {
+            console.log(`Error Scraping Jobs - ${successCount} Successful Scrapes - ${errorCount} Unsuccessful Scrapes`);
+
+            /*
+                Future Implementation - Connect to Slack/Discord Channel to notify of failure
+            */
+        }
+        else {
+            console.log(`\nSuccessfully Scraped ${successCount} Jobs With ${errorCount} Errors`);
+
+            const scrapedData: ScrapedData = {
+                companyName: CompanyNames.JANE_STREET,
+                scrapedAt: new Date().toISOString(),
+                searchTerm: `${SEARCH_TECHNOLOGY} - ${SEARCH_JANE_STREET}`,
+                totalJobs: uniqueJobs.length,
+                jobs: jobListings
+            };
+
+            const outputDir: string = path.join(__dirname, dataOutputDirectory);
+            deleteOldFiles(outputDir, scraperPrefix);
+            writeNewFile(outputDir, scraperPrefix, scrapedData);
+        }
     } catch (error) {
         console.log("Error Occured While Scraping: " + error);
     } finally {
         bandwidthTracker.printSummary();
 
-        /*
         const outputDir: string = path.join(__dirname, usageOutputDirectory);
         deleteOldFiles(outputDir, scraperPrefix);
         writeNewFile(outputDir, scraperPrefix, bandwidthTracker.returnStats());
-        */
 
         await browser.close();
         console.log("\n Finished Running - Scraper 0009 - Jane Street Careers");
