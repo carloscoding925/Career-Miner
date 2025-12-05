@@ -3,11 +3,13 @@ import { fileURLToPath } from "url";
 import { getFilePrefix } from "../utils/naming-util.js";
 import { BandwidthTracker } from "../utils/bandwidth-util.js";
 import { Browser, BrowserContext, chromium, Locator, Page } from "playwright";
-import { usageOutputDirectory } from "../constants/directories.js";
-import { deleteOldFiles, writeNewFile } from "../utils/file-io-util";
+import { dataOutputDirectory, usageOutputDirectory } from "../constants/directories.js";
+import { deleteOldFiles, writeNewFile } from "../utils/file-io-util.js";
 import { CompanyUrls } from "../models/companies.js";
 import { SEARCH_SOFTWARE } from "../constants/search-terms.js";
-import { PostingCoverData } from "../models/data-storage.js";
+import { FullJobDetails, PostingCoverData, ScrapedData } from "../models/data-storage.js";
+import { validateJobDetails } from "../utils/data-util.js";
+import { CompanyNames } from "../models/company-names.js";
 
 async function scrapeTwitchCareers() {
     console.log("Running Scraper 0008 - Twitch Careers");
@@ -64,16 +66,111 @@ async function scrapeTwitchCareers() {
             jobUrl: CompanyUrls.TWITCH + job.jobUrl
         }));
         console.log(`Found ${jobUrls.length} Job Postings`);
+
+        // Extract Posting Data
+        const jobListings: FullJobDetails[] = [];
+        let errorCount: number = 0;
+        let successCount: number = 0;
+
+        for (let i = 0; i < jobUrls.length; i++) {
+            const job: PostingCoverData = jobUrls[i];
+            console.log(`\n Scraping Job ${i + 1}/${jobUrls.length}: ${job.title}`);
+
+            try {
+                await page.goto(job.jobUrl, { waitUntil: 'load'});
+                await page.waitForTimeout(1000);
+
+                const location: string = await page.locator('.flex.flex-col.p-6.bg-white > div').nth(1).textContent() ?? "";
+
+                const jobIdElement: Locator = await page.locator('.prose p:has-text("Job ID:")').first();
+                const jobId: string = await jobIdElement.count() > 0 ? await jobIdElement.textContent() ?? "" : "N/A";
+
+                const payRangeElement: Locator = await page.locator('.pay-range').first();
+                const payRange: string = await payRangeElement.count() > 0 ? await payRangeElement.textContent() ?? "" : "N/A";
+
+                const description: string = await page.locator('.prose').evaluate((proseDiv) => {
+                    const aboutRoleHeader: HTMLHeadingElement | undefined = Array.from(proseDiv.querySelectorAll('h3')).find(
+                        h3 => h3.textContent?.includes('About the Role')
+                    );
+
+                    if (!aboutRoleHeader) {
+                        return "";
+                    }
+
+                    let description: string = "";
+                    let currentElement: Element | null = aboutRoleHeader.nextElementSibling;
+
+                    while (currentElement && currentElement.tagName !== 'H3') {
+                        description = description + currentElement.textContent?.trim() + '\n\n';
+                        currentElement = currentElement.nextElementSibling;
+                    }
+
+                    return description.trim();
+                });
+
+                const jobDetails: FullJobDetails = {
+                    jobUrl: job.jobUrl,
+                    jobTitle: job.title,
+                    description: description,
+                    payRange: payRange,
+                    location: location,
+                    postingDate: "N/A",
+                    jobId: jobId
+                }
+                const isValid: boolean = validateJobDetails(jobDetails);
+
+                if (!isValid) {
+                    console.log(`⚠ Invalid data for job: ${i + 1}/${jobUrls.length} - ${job.title}, skipping`);
+                    errorCount++;
+                    continue;
+                }
+
+                jobListings.push(jobDetails);
+                console.log(`✓ Successfully Scraped Job: ${job.title}`);
+                successCount++;
+            } catch (error) {
+                console.error(`✗ Error scraping ${job.title}:`, error);
+                errorCount++;
+            }
+        }
+
+        if (jobUrls.length === 0 || jobListings.length === 0) {
+            console.log("No Listings Found");
+
+            /*
+                Future Implementation - Connect to Slack/Discord to notify of potentially broken scraper or no Listings
+            */
+        }        
+        else if (errorCount > 0) {
+            console.log(`Error Scraping Jobs - ${successCount} Successful Scrapes - ${errorCount} Unsuccessful Scrapes`);
+
+            /*
+                Future Implementation - Connect to Slack/Discord Channel to notify of failure
+            */
+        }
+        else {
+            console.log(`\nSuccessfully Scraped ${successCount} Jobs With ${errorCount} Errors`);
+
+            const scrapedData: ScrapedData = {
+                companyName: CompanyNames.TWITCH,
+                scrapedAt: new Date().toISOString(),
+                searchTerm: `${SEARCH_SOFTWARE}`,
+                totalJobs: jobListings.length,
+                jobs: jobListings
+            };
+
+            const outputDir: string = path.join(__dirname, dataOutputDirectory);
+            deleteOldFiles(outputDir, scraperPrefix);
+            writeNewFile(outputDir, scraperPrefix, scrapedData);
+        }
     } catch (error) {
         console.log("Error Occured While Scraping: " + error);
     } finally {
         bandwidthTracker.printSummary();
 
-        /*
         const outputDir: string = path.join(__dirname, usageOutputDirectory);
         deleteOldFiles(outputDir, scraperPrefix);
         writeNewFile(outputDir, scraperPrefix, bandwidthTracker.returnStats());
-        */
 
         await browser.close();
         console.log("\n Finished Running - Scraper 0008 - Twitch Careers");
