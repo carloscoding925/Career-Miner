@@ -3,4 +3,5 @@ export enum CompanyUrls {
     CITIZEN_HEALTH = 'https://citizen.health/careers',
     CITADEL = 'https://citadel.com/careers',
     JANE_STREET = 'https://janestreet.com/join-jane-street/',
+    TWITCH = 'https://careers.twitch.com',
 }
