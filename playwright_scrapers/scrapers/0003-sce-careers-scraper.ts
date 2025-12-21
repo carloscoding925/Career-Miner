@@ -2,7 +2,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { getFilePrefix } from "../utils/naming-util.js";
 import { BandwidthTracker } from "../utils/bandwidth-util.js";
-import { Browser, BrowserContext, chromium, Page } from "playwright";
+import { Browser, BrowserContext, chromium, Locator, Page } from "playwright";
 import { CompanyUrls } from "../models/companies.js";
 import { SEARCH_INFORMATION_TECHNOLOGY } from "../constants/search-terms.js";
 import { PostingCoverData } from "../models/data-storage.js";
@@ -49,6 +49,39 @@ async function scrapeSouthernEdisonCareers() {
         await page.waitForTimeout(1000);
 
         const jobUrls: PostingCoverData[] = [];
+        let currentPage: number = 1;
+
+        while (true) {
+            console.log(`Scraping Page ${currentPage}`);
+
+            await page.waitForSelector('#widget-jobsearch-results-list .job');
+            await page.waitForTimeout(1000); 
+
+            const jobs: Locator[] = await page.locator('#widget-jobsearch-results-list .job').all();
+
+            for (const job of jobs) {
+                const titleLink: Locator = job.locator('.jobTitle a');
+                const title: string = await titleLink.textContent() ?? "";
+                const url: string = await titleLink.getAttribute('href') ?? "";
+
+                jobUrls.push({
+                    title: title.trim(),
+                    jobUrl: url.trim()
+                });
+            }
+
+            const nextButton: Locator = page.locator('a[aria-label="Go to the next page of results."]');
+            const hasNextPage: boolean = await nextButton.count() > 0;
+
+            if (!hasNextPage) {
+                console.log("Reached Last Page");
+                break;
+            }
+
+            await nextButton.click();
+            await page.waitForLoadState('networkidle');
+            currentPage++;
+        }
     } catch (error) {
         console.log("Error Occured While Scraping: " + error);
     } finally {
