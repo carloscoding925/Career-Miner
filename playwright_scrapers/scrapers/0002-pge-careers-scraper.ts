@@ -279,7 +279,7 @@ async function scrapePgeCareers() {
         deleteOldFiles(outputDir, scraperPrefix);
         writeNewFile(outputDir, scraperPrefix, bandwidthTracker.returnStats());
 
-        browser.close();
+        await browser.close();
         console.log("\n Finished Running - Scraper 0002 - PG&E Careers");
     }
 }
