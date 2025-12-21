@@ -112,8 +112,13 @@ async function scrapePgeCareers() {
 
                 // Extract job details
                 const jobDetails: FullJobDetails | null = await page.evaluate((job) => {
-                    const descriptionDiv: Element | null = document.querySelector('.ats-description.ajd_job-details__ats-description');
-                    if (!descriptionDiv) { 
+                    // Try multiple selectors for the description div
+                    let descriptionDiv: Element | null = document.querySelector('.ats-description.ajd_job-details__ats-description');
+                    if (!descriptionDiv) {
+                        descriptionDiv = document.querySelector('.ats-description');
+                    }
+
+                    if (!descriptionDiv) {
                         return null;
                     }
 
@@ -123,32 +128,79 @@ async function scrapePgeCareers() {
                     const jobIdMatch: RegExpMatchArray | null = text.match(/Requisition ID\s*#?\s*(\d+)/i);
                     const jobId: string = jobIdMatch ? jobIdMatch[1] : '';
 
-                    // Extract Job Location
-                    const locationMatch: RegExpMatchArray | null = text.match(/Job Location:\s*([^\n]+)/i);
-                    const location: string = locationMatch ? locationMatch[1].trim() : '';
+                    // Extract Job Location - try multiple methods
+                    let location: string = '';
 
-                    // Extract Pay Range
-                    const payRangeMatch: RegExpMatchArray | null = text.match(/Pay range is:\s*\$([0-9,]+)\s*-\s*\$([0-9,]+)/i);
-                    const payRange: string = payRangeMatch ? `$${payRangeMatch[1]} - $${payRangeMatch[2]}` : '';
+                    // Method 1: Try the job-location span element
+                    const locationSpan: Element | null = document.querySelector('.job-location.job-info');
+                    if (locationSpan) {
+                        const locationText: string = locationSpan.textContent || '';
+                        location = locationText.replace(/^Location\s*/i, '').replace(/;$/, '').trim();
+                    }
 
-                    // Extract Department Overview description
+                    // Method 2: Try extracting from text content
+                    if (!location) {
+                        const locationMatch: RegExpMatchArray | null = text.match(/Job Location:\s*([^\n]+)/i);
+                        location = locationMatch ? locationMatch[1].trim() : '';
+                    }
+
+                    // Extract Pay Range - use a more general approach
+                    let payRange: string = '';
+
+                    // Method 1: Try the standard format with two amounts
+                    const payRegex = /(pay\s+range|compensation\s+range|hourly\s+rate|salary\s+range)[^$]*?\$([0-9,.]+(?:K)?)[^$]*?(?:to|-)[^$]*?\$([0-9,.]+(?:K)?)/i;
+                    const payMatch: RegExpMatchArray | null = text.match(payRegex);
+
+                    if (payMatch) {
+                        const amount1: string = payMatch[2];
+                        const amount2: string = payMatch[3];
+                        const isHourly: boolean = /hourly/i.test(payMatch[1]);
+
+                        // Format the output
+                        if (isHourly) {
+                            payRange = `$${amount1}/hr - $${amount2}/hr`;
+                        }
+                        else {
+                            payRange = `$${amount1} - $${amount2}`;
+                        }
+                    } else {
+                        // Method 2: Try the min/midpoint/max format
+                        // Match with optional colon and prioritize Bay Area if multiple regions exist
+                        const bayAreaMinMatch: RegExpMatchArray | null = text.match(/minimum[^\$]*?(?:bay\s+area)[^\$]*?\$([0-9,.]+(?:K)?)/i);
+                        const bayAreaMaxMatch: RegExpMatchArray | null = text.match(/maximum[^\$]*?(?:bay\s+area)[^\$]*?\$([0-9,.]+(?:K)?)/i);
+
+                        if (bayAreaMinMatch && bayAreaMaxMatch) {
+                            // Found Bay Area specific range
+                            payRange = `$${bayAreaMinMatch[1]} - $${bayAreaMaxMatch[1]}`;
+                        } else {
+                            // Fall back to generic minimum/maximum (with or without colon)
+                            const minMatch: RegExpMatchArray | null = text.match(/minimum[:\s]*\$([0-9,.]+(?:K)?)/i);
+                            const maxMatch: RegExpMatchArray | null = text.match(/maximum[:\s]*\$([0-9,.]+(?:K)?)/i);
+
+                            if (minMatch && maxMatch) {
+                                payRange = `$${minMatch[1]} - $${maxMatch[1]}`;
+                            }
+                        }
+                    }
+
+                    // Extract Department Overview or Position Summary description
                     let description: string = '';
-                    const paragraphs: HTMLParagraphElement[] = Array.from(descriptionDiv.querySelectorAll('p'));
-                    let foundDeptOverview: boolean = false;
+                    const allElements: Element[] = Array.from(descriptionDiv.querySelectorAll('p, h2, h3'));
+                    let foundHeader: boolean = false;
 
-                    for (let i = 0; i < paragraphs.length; i++) {
-                        const p: HTMLParagraphElement = paragraphs[i];
-                        const pText: string = p.textContent || '';
+                    for (let i = 0; i < allElements.length; i++) {
+                        const element: Element = allElements[i];
+                        const elementText: string = element.textContent || '';
 
-                        // Check if this paragraph contains "Department Overview"
-                        if (pText.includes('Department Overview')) {
-                            foundDeptOverview = true;
+                        // Check if this element contains "Department Overview" or "Position Summary"
+                        if (elementText.match(/Department Overview|Position Summary/i)) {
+                            foundHeader = true;
                             continue;
                         }
 
-                        // If we found Department Overview, get the next paragraph as description
-                        if (foundDeptOverview && pText.trim()) {
-                            description = pText.trim();
+                        // If we found the header, get the next element with content as description
+                        if (foundHeader && elementText.trim()) {
+                            description = elementText.trim();
                             break;
                         }
                     }
@@ -173,6 +225,7 @@ async function scrapePgeCareers() {
                 const isValid: boolean = validateJobDetails(jobDetails);
                 if (!isValid) {
                     console.log(`⚠ Invalid data for job: ${i + 1}/${jobUrls.length} - ${job.title}, skipping`);
+                    console.log(jobDetails);
                     errorCount++;
                     continue;
                 }
