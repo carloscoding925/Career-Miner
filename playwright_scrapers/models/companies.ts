@@ -5,4 +5,5 @@ export enum CompanyUrls {
     JANE_STREET = 'https://janestreet.com/join-jane-street/',
     TWITCH = 'https://careers.twitch.com',
     SEAT_GEEK = 'https://seatgeek.com/jobs',
+    PGE = 'https://jobs.pge.com',
 }
