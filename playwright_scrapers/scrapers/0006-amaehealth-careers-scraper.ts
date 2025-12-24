@@ -128,6 +128,7 @@ async function scrapeAmaeHealthCareers() {
         else {
             console.log(`\nSuccessfully Scraped ${successCount} Jobs With ${errorCount} Errors`);
 
+            // Create Data JSON
             const scrapedData: ScrapedData = {
                 companyName: CompanyNames.AMAE_HEALTH,
                 scrapedAt: new Date().toISOString(),
