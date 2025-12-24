@@ -6,5 +6,4 @@ export enum CompanyNames {
     TWITCH = "Twitch",
     PGE = "Pacific Gas & Electric",
     SCE = "Southern California Edison",
-    CREDIT_ONE = "Credit One Bank",
 }

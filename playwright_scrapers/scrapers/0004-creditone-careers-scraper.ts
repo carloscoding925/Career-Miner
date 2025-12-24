@@ -33,7 +33,7 @@ async function scrapeCreditOneCareers() {
 
     try {
         console.log("Navigating to Careers Page");
-        await page.goto(CompanyUrls.CREDIT_ONE, {
+        /*await page.goto(CompanyUrls.CREDIT_ONE, {
             waitUntil: 'load'
         });
 
@@ -44,7 +44,7 @@ async function scrapeCreditOneCareers() {
         await page.click('input[type="submit"].search-button');
 
         await page.waitForLoadState('load');
-        await page.waitForTimeout(3000);
+        await page.waitForTimeout(3000);*/
     } catch (error) {
         console.log("Error Occured While Scraping: " + error);
     } finally {
