@@ -6,4 +6,5 @@ export enum CompanyUrls {
     TWITCH = 'https://careers.twitch.com',
     PGE = 'https://jobs.pge.com',
     SCE = 'https://www.edisoncareers.com',
+    CREDIT_ONE = 'https://careers.creditonebank.com',
 }
