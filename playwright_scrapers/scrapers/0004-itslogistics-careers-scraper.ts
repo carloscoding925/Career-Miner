@@ -5,7 +5,11 @@ import { BandwidthTracker } from "../utils/bandwidth-util.js";
 import { Browser, BrowserContext, chromium, Locator, Page } from "playwright";
 import { CompanyUrls } from "../models/companies.js";
 import { SEARCH_TECH } from "../constants/search-terms.js";
-import { FullJobDetails, PostingCoverData } from "../models/data-storage.js";
+import { FullJobDetails, PostingCoverData, ScrapedData } from "../models/data-storage.js";
+import { validateJobDetails } from "../utils/data-util.js";
+import { CompanyNames } from "../models/company-names.js";
+import { dataOutputDirectory, usageOutputDirectory } from "../constants/directories.js";
+import { deleteOldFiles, writeNewFile } from "../utils/file-io-util.js";
 
 async function scrapeCreditOneCareers() {
     console.log("Running Scraper 0004 - ITS Logistics Careers");
@@ -86,8 +90,27 @@ async function scrapeCreditOneCareers() {
             try {
                 await page.goto(job.jobUrl, { waitUntil: 'load' });
 
-                
+                const location: string = await page.locator('.job__location div').innerText();
+                const description: string = await page.locator('.job__description').innerText();
 
+                const jobDetails: FullJobDetails = {
+                    jobUrl: job.jobUrl,
+                    jobTitle: job.title,
+                    description: description.trim(),
+                    payRange: "N/A",
+                    location: location.trim(),
+                    postingDate: postedDates[i],
+                    jobId: "N/A"
+                };
+                const isValid: boolean = validateJobDetails(jobDetails);
+
+                if (!isValid) {
+                    console.log(`⚠ Invalid data for job: ${i + 1}/${jobUrls.length} - ${job.title}, skipping`);
+                    errorCount++;
+                    continue;
+                }
+
+                jobListings.push(jobDetails);
                 console.log(`✓ Successfully Scraped Job: ${job.title}`);
                 successCount++;
             } catch (error) {
@@ -95,10 +118,46 @@ async function scrapeCreditOneCareers() {
                 errorCount++;
             }
         }
+
+        if (jobUrls.length === 0 || jobListings.length === 0) {
+            console.log("No Listings Found");
+
+            /*
+                Future Implementation - Connect to Slack/Discord to notify of potentially broken scraper or no Listings
+            */
+        }
+        else if (errorCount > 0) {
+            console.log(`Error Scraping Jobs - ${successCount} Successful Scrapes - ${errorCount} Unsuccessful Scrapes`);
+
+            /*
+                Future Implementation - Connect to Slack/Discord Channel to notify of failure
+            */
+        }
+        else {
+            console.log(`\nSuccessfully Scraped ${successCount} Jobs With ${errorCount} Errors`);
+
+            // Create Data JSON
+            const scrapedData: ScrapedData = {
+                companyName: CompanyNames.ITS,
+                scrapedAt: new Date().toISOString(),
+                searchTerm: SEARCH_TECH,
+                totalJobs: jobListings.length,
+                jobs: jobListings
+            };
+
+            // Delete old output file and store new file
+            const outputDir: string = path.join(__dirname, dataOutputDirectory);
+            deleteOldFiles(outputDir, scraperPrefix);
+            writeNewFile(outputDir, scraperPrefix, scrapedData);
+        }
     } catch (error) {
         console.log("Error Occured While Scraping: " + error);
     } finally {
         bandwidthTracker.printSummary();
+
+        const outputDir: string = path.join(__dirname, usageOutputDirectory);
+        deleteOldFiles(outputDir, scraperPrefix);
+        writeNewFile(outputDir, scraperPrefix, bandwidthTracker.returnStats());
 
         await browser.close();
         console.log("\n Finished Running - Scraper 0004 - ITS Logistics Careers");

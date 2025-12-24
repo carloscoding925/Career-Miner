@@ -1,0 +1,12 @@
+{
+    "totalRequestBytes": 167671,
+    "totalResponseBytes": 3090026,
+    "totalBytes": 3257697,
+    "requestCount": 266,
+    "breakdown": {
+        "requestHeaders": 163836,
+        "requestBody": 3835,
+        "responseHeaders": 47913,
+        "responseBody": 3042113
+    }
+}
