@@ -8,4 +8,5 @@ export enum CompanyUrls {
     SCE = 'https://www.edisoncareers.com',
     AMAE_HEALTH = 'https://job-boards.greenhouse.io/amaehealth',
     ITS = 'https://www.its4logistics.com/careers',
+    AFFIRM = 'https://www.affirm.com/careers',
 }
