@@ -5,7 +5,11 @@ import { BandwidthTracker } from "../utils/bandwidth-util.js";
 import { Browser, BrowserContext, chromium, Locator, Page } from "playwright";
 import { CompanyUrls } from "../models/companies.js";
 import { SEARCH_TECHNOLOGY } from "../constants/search-terms.js";
-import { PostingCoverData } from "../models/data-storage.js";
+import { FullJobDetails, PostingCoverData, ScrapedData } from "../models/data-storage.js";
+import { validateJobDetails } from "../utils/data-util.js";
+import { CompanyNames } from "../models/company-names.js";
+import { dataOutputDirectory, usageOutputDirectory } from "../constants/directories.js";
+import { deleteOldFiles, writeNewFile } from "../utils/file-io-util.js";
 
 async function scrapeAmaeHealthCareers() {
     console.log("Running Scraper 0006 - Amae Health Careers");
@@ -59,12 +63,92 @@ async function scrapeAmaeHealthCareers() {
                 jobUrl: url.trim()
             });
         }
+        console.log(`\nFound ${jobUrls.length} Job Postings`);
+        
+        const jobListings: FullJobDetails[] = [];
+        let errorCount: number = 0;
+        let successCount: number = 0;
 
-        console.log(jobUrls);
+        for (let i = 0; i < jobUrls.length; i++) {
+            const job: PostingCoverData = jobUrls[i];
+            console.log(`\nScraping Job ${i + 1}/${jobUrls.length}: ${job.title}`);
+
+            try {
+                await page.goto(job.jobUrl, { waitUntil: 'load' });
+
+                const location: string = await page.locator('.job__location div').textContent() ?? "";
+
+                const descriptionDiv: Locator = page.locator('.job__description > div:nth-child(2)');
+                const fullDescription: string = await descriptionDiv.textContent() ?? "";
+
+                const salaryText: string = await page.locator('.job__description p:has-text("Base salary range")').textContent() ?? "";
+                const salaryMatch: RegExpMatchArray | null = salaryText.match(/\$[\d,]+\s+to\s+\$[\d,]+/);
+                const salaryRange: string = salaryMatch ? salaryMatch[0] : "";
+
+                const jobDetails: FullJobDetails = {
+                    jobUrl: job.jobUrl,
+                    jobTitle: job.title,
+                    description: fullDescription.trim(),
+                    payRange: salaryRange.trim(),
+                    location: location.trim(),
+                    postingDate: "N/A",
+                    jobId: "N/A"
+                };
+                const isValid: boolean = validateJobDetails(jobDetails);
+
+                if (!isValid) {
+                    console.log(`⚠ Invalid data for job: ${i + 1}/${jobUrls.length} - ${job.title}, skipping`);
+                    errorCount++;
+                    continue;
+                }
+
+                jobListings.push(jobDetails);
+                console.log(`✓ Successfully Scraped Job: ${job.title}`);
+                successCount++;
+            } catch (error) {
+                console.error(`✗ Error scraping ${job.title}:`, error);
+                errorCount++;
+            }
+        }
+
+        if (jobUrls.length === 0 || jobListings.length === 0) {
+            console.log("No Listings Found");
+
+            /*
+                Future Implementation - Connect to Slack/Discord to notify of potentially broken scraper or no Listings
+            */
+        }
+        else if (errorCount > 0) {
+            console.log(`Error Scraping Jobs - ${successCount} Successful Scrapes - ${errorCount} Unsuccessful Scrapes`);
+
+            /*
+                Future Implementation - Connect to Slack/Discord Channel to notify of failure
+            */
+        }
+        else {
+            console.log(`\nSuccessfully Scraped ${successCount} Jobs With ${errorCount} Errors`);
+
+            const scrapedData: ScrapedData = {
+                companyName: CompanyNames.AMAE_HEALTH,
+                scrapedAt: new Date().toISOString(),
+                searchTerm: SEARCH_TECHNOLOGY,
+                totalJobs: jobListings.length,
+                jobs: jobListings
+            };
+
+            // Delete old output file and store new file
+            const outputDir: string = path.join(__dirname, dataOutputDirectory);
+            deleteOldFiles(outputDir, scraperPrefix);
+            writeNewFile(outputDir, scraperPrefix, scrapedData);
+        }
     } catch (error) {
         console.log("Error Occured While Scraping: " + error);
     } finally {
         bandwidthTracker.printSummary();
+
+        const outputDir: string = path.join(__dirname, usageOutputDirectory);
+        deleteOldFiles(outputDir, scraperPrefix);
+        writeNewFile(outputDir, scraperPrefix, bandwidthTracker.returnStats());
 
         await browser.close();
         console.log("\n Finished Running - Scraper 0006 - Amae Health Careers");
