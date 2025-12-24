@@ -5,7 +5,11 @@ import { BandwidthTracker } from "../utils/bandwidth-util.js";
 import { Browser, BrowserContext, chromium, Locator, Page } from "playwright";
 import { CompanyUrls } from "../models/companies.js";
 import { SEARCH_INFORMATION_TECHNOLOGY } from "../constants/search-terms.js";
-import { PostingCoverData } from "../models/data-storage.js";
+import { FullJobDetails, PostingCoverData, ScrapedData } from "../models/data-storage.js";
+import { validateJobDetails } from "../utils/data-util.js";
+import { CompanyNames } from "../models/company-names.js";
+import { dataOutputDirectory, usageOutputDirectory } from "../constants/directories.js";
+import { deleteOldFiles, writeNewFile } from "../utils/file-io-util.js";
 
 async function scrapeSouthernEdisonCareers() {
     console.log("Running Scraper 0003 - Southern California Edison Careers");
@@ -66,7 +70,7 @@ async function scrapeSouthernEdisonCareers() {
 
                 jobUrls.push({
                     title: title.trim(),
-                    jobUrl: url.trim()
+                    jobUrl: CompanyUrls.SCE + url.trim()
                 });
             }
 
@@ -82,10 +86,114 @@ async function scrapeSouthernEdisonCareers() {
             await page.waitForLoadState('networkidle');
             currentPage++;
         }
+
+        const jobListings: FullJobDetails[] = [];
+        let errorCount: number = 0;
+        let successCount: number = 0;
+
+        for (let i = 0; i < jobUrls.length; i++) {
+            const job: PostingCoverData = jobUrls[i];
+            console.log(`\nScraping Job ${i + 1}/${jobUrls.length}: ${job.title}`);
+
+            try {
+                await page.goto(job.jobUrl, { waitUntil: 'load' });
+                await page.waitForSelector('.job-details__info');
+
+                const jobIdElement: Locator = page.locator('li[title="Job ID"]');
+                const jobIdText: string = await jobIdElement.textContent() ?? "";
+                const jobId: string = jobIdText.replace(/Job ID:\s*/i, '').trim();
+
+                const locationElement: Locator = page.locator('li[title="Location"]');
+                const locationText: string = await locationElement.textContent() ?? "";
+                const location: string = locationText.replace(/Location:\s*/i, '').trim();
+
+                const payElement: Locator = page.locator('.job-details__info-salary .salary-range');
+                const payElementText: string = await payElement.evaluate(el => {
+                    const clone: HTMLElement = el.cloneNode(true) as HTMLElement;
+
+                    const tooltip: Element | null = clone.querySelector('.tooltiptext');
+                    if (tooltip) {
+                        tooltip.remove();
+                    }
+
+                    const icon: Element | null = clone.querySelector('.tool-trigger');
+                    if (icon) {
+                        icon.remove();
+                    }
+
+                    return clone.innerText.trim();
+                });
+                const payRange: string = payElementText.trim();
+
+                await page.waitForSelector('.jddescription');
+                const descriptionElement: Locator = page.locator('.jddescription .fusion-column-wrapper');
+                const description: string = await descriptionElement.innerText();
+                description.trim();
+
+                const jobDetails: FullJobDetails = {
+                    jobUrl: job.jobUrl,
+                    jobTitle: job.title,
+                    description: description,
+                    payRange: payRange,
+                    location: location,
+                    postingDate: "N/A",
+                    jobId: jobId
+                }
+                const isValid: boolean = validateJobDetails(jobDetails);
+
+                if (!isValid) {
+                    console.log(`⚠ Invalid data for job: ${i + 1}/${jobUrls.length} - ${job.title}, skipping`);
+                    errorCount++;
+                    continue;
+                }
+
+                jobListings.push(jobDetails);
+                console.log(`✓ Successfully Scraped Job: ${job.title}`);
+                successCount++;
+            } catch (error) {
+                console.error(`✗ Error scraping ${job.title}:`, error);
+                errorCount++;
+            }
+        }
+
+        if (jobUrls.length === 0 || jobListings.length === 0) {
+            console.log("No Listings Found");
+
+            /*
+                Future Implementation - Connect to Slack/Discord to notify of potentially broken scraper or no Listings
+            */
+        }
+        else if (errorCount > 0) {
+            console.log(`Error Scraping Jobs - ${successCount} Successful Scrapes - ${errorCount} Unsuccessful Scrapes`);
+
+            /*
+                Future Implementation - Connect to Slack/Discord Channel to notify of failure
+            */
+        }
+        else {
+            console.log(`\nSuccessfully Scraped ${successCount} Jobs With ${errorCount} Errors`);
+
+            // Create Data JSON
+            const scrapedData: ScrapedData = {
+                companyName: CompanyNames.SCE,
+                scrapedAt: new Date().toISOString(),
+                searchTerm: SEARCH_INFORMATION_TECHNOLOGY,
+                totalJobs: jobListings.length,
+                jobs: jobListings
+            };
+
+            const outputDir: string = path.join(__dirname, dataOutputDirectory);
+            deleteOldFiles(outputDir, scraperPrefix);
+            writeNewFile(outputDir, scraperPrefix, scrapedData);
+        }
     } catch (error) {
         console.log("Error Occured While Scraping: " + error);
     } finally {
         bandwidthTracker.printSummary();
+
+        const outputDir: string = path.join(__dirname, usageOutputDirectory);
+        deleteOldFiles(outputDir, scraperPrefix);
+        writeNewFile(outputDir, scraperPrefix, bandwidthTracker.returnStats());
 
         await browser.close();
         console.log("\n Finished Running - Scraper 0003 - SCE Careers");

@@ -5,4 +5,5 @@ export enum CompanyNames {
     JANE_STREET = "Jane Street",
     TWITCH = "Twitch",
     PGE = "Pacific Gas & Electric",
+    SCE = "Southern California Edison",
 }
