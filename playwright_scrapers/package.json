@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "scrape:execute": "node --loader ts-node/esm core/execute.ts",
-    "scrape:test": "node --loader ts-node/esm --env-file=.env scrapers/0006-amaehealth-careers-scraper.ts"
+    "scrape:test": "node --loader ts-node/esm --env-file=.env scrapers/0004-itslogistics-careers-scraper.ts"
   },
   "keywords": [],
   "author": "",
