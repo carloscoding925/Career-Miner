@@ -6,4 +6,5 @@ export enum CompanyUrls {
     TWITCH = 'https://careers.twitch.com',
     PGE = 'https://jobs.pge.com',
     SCE = 'https://www.edisoncareers.com',
+    AMAE_HEALTH = 'https://job-boards.greenhouse.io/amaehealth'
 }
