@@ -5,7 +5,7 @@ import { BandwidthTracker } from "../utils/bandwidth-util.js";
 import { Browser, BrowserContext, chromium, Locator, Page } from "playwright";
 import { CompanyUrls } from "../models/companies.js";
 import { SEARCH_TECH } from "../constants/search-terms.js";
-import { PostingCoverData } from "../models/data-storage.js";
+import { FullJobDetails, PostingCoverData } from "../models/data-storage.js";
 
 async function scrapeCreditOneCareers() {
     console.log("Running Scraper 0004 - ITS Logistics Careers");
@@ -53,14 +53,47 @@ async function scrapeCreditOneCareers() {
         for (let i = 0; i < jobWrappers.length; i++) {
             const title: string = await jobWrappers[i].locator('.Job-module-scss-module__MPRUTW__name').textContent() ?? "";
             const link: string = await jobWrappers[i].locator('a.Button-module-scss-module__Ib45na__button').getAttribute('href') ?? "";
-            const postedDays = await jobWrappers[i].locator('.Job-module-scss-module__MPRUTW__postedDays').textContent() ?? "";
+            const postedDaysText: string = await jobWrappers[i].locator('.Job-module-scss-module__MPRUTW__postedDays').textContent() ?? "";
+
+            const daysAgoMatch: RegExpMatchArray | null = postedDaysText.match(/\d+/);
+            const daysAgo: number = daysAgoMatch ? parseInt(daysAgoMatch[0]) : 0;
+
+            const postDate: Date = new Date();
+            postDate.setDate(postDate.getDate() - daysAgo);
+
+            // Format as MM/DD/YYYY
+            const month: string = String(postDate.getMonth() + 1).padStart(2, '0');
+            const day: string = String(postDate.getDate()).padStart(2, '0');
+            const year: number = postDate.getFullYear();
+            const formattedDate: string = `${month}/${day}/${year}`;
 
             jobUrls.push({
                 title: title.trim(),
                 jobUrl: link.trim()
             });
 
-            postedDates.push(postedDays.trim());
+            postedDates.push(formattedDate);
+        }
+
+        const jobListings: FullJobDetails[] = [];
+        let errorCount: number = 0;
+        let successCount: number = 0;
+
+        for (let i = 0; i < jobUrls.length; i++) {
+            const job: PostingCoverData = jobUrls[i];
+            console.log(`\nScraping Job ${i + 1}/${jobUrls.length}: ${job.title}`);
+
+            try {
+                await page.goto(job.jobUrl, { waitUntil: 'load' });
+
+                
+
+                console.log(`✓ Successfully Scraped Job: ${job.title}`);
+                successCount++;
+            } catch (error) {
+                console.error(`✗ Error scraping ${job.title}:`, error);
+                errorCount++;
+            }
         }
     } catch (error) {
         console.log("Error Occured While Scraping: " + error);
