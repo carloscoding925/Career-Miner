@@ -61,10 +61,10 @@ async function scrapeSeatGeekCareers() {
 
         for (let i = 0; i < jobCards.length; i++) {
             const location: string | null = await jobCards[i].locator('.JobCard-office--tctKv').textContent();
+            const url: string = await jobCards[i].getAttribute('href') ?? "";
 
-            if (location && officeLocations.includes(location)) {
+            if (location && officeLocations.includes(location) && url.includes('https://')) {
                 const title: string = await jobCards[i].locator('.JobCard-title--4edEZ').textContent() ?? "";
-                const url: string = await jobCards[i].getAttribute('href') ?? "";
 
                 jobUrls.push({
                     title: title.trim(),
@@ -91,8 +91,18 @@ async function scrapeSeatGeekCareers() {
                 const jobDescription: string = await page.locator('.job__description.body > div').nth(1).textContent() ?? "";
 
                 const descriptionText: string = await page.locator('.job__description.body').textContent() ?? "";
-                const payRangeMatch: RegExpMatchArray | null = descriptionText.match(/\$[\d,]+\s*-\s*\$[\d,]+/);
-                const payRange: string = payRangeMatch ? payRangeMatch[0] : "";
+
+                let payRangeMatch: RegExpMatchArray | null = descriptionText.match(/\$[\d,]+\s*-\s*\$[\d,]+/);
+                let payRange: string = "";
+
+                if (payRangeMatch) {
+                    payRange = payRangeMatch[0];
+                } else {
+                    const hourlyRateMatch: RegExpMatchArray | null = descriptionText.match(/USA hourly base pay:\s*\$([\d,]+(?:\.\d{2})?)/);
+                    if (hourlyRateMatch) {
+                        payRange = `$${hourlyRateMatch[1]}`;
+                    }
+                }
 
                 const jobDetails: FullJobDetails = {
                     jobUrl: job.jobUrl,
@@ -107,6 +117,7 @@ async function scrapeSeatGeekCareers() {
 
                 if (!isValid) {
                     console.log(`⚠ Invalid data for job: ${i + 1}/${jobUrls.length} - ${job.title}, skipping`);
+                    console.log(jobDetails);
                     errorCount++;
                     continue;
                 }
