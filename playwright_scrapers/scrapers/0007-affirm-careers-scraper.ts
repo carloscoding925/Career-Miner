@@ -6,7 +6,11 @@ import { Browser, BrowserContext, chromium, Locator, Page } from "playwright";
 import { CompanyUrls } from "../models/companies.js";
 import { SEARCH_ENGINEERING } from "../constants/search-terms.js";
 import { FILTER_NEW_YORK_LONG, FILTER_REMOTE_US, FILTER_SAN_FRANCISCO } from "../constants/filters.js";
-import { PostingCoverData } from "../models/data-storage.js";
+import { FullJobDetails, PostingCoverData, ScrapedData } from "../models/data-storage.js";
+import { validateJobDetails } from "../utils/data-util.js";
+import { CompanyNames } from "../models/company-names.js";
+import { dataOutputDirectory } from "../constants/directories.js";
+import { deleteOldFiles, writeNewFile } from "../utils/file-io-util.js";
 
 async function scrapeSeatGeekCareers() {
     console.log("Running Scraper 0007 - Affirm Careers");
@@ -69,8 +73,84 @@ async function scrapeSeatGeekCareers() {
             }
         }
 
-        console.log(jobUrls);
-        console.log(`Found ${jobUrls.length} jobs`);
+        console.log(`Found ${jobUrls.length} Job Postings`);
+
+        const jobListings: FullJobDetails[] = [];
+        let errorCount: number = 0;
+        let successCount: number = 0;
+
+        for (let i = 0; i < jobUrls.length; i++) {
+            const job: PostingCoverData = jobUrls[i];
+            console.log(`\nScraping Job ${i + 1}/${jobUrls.length}: ${job.title}`);
+
+            try {
+                await page.goto(job.jobUrl, { waitUntil: 'load' });
+
+                const location: string = await page.locator('.job__location div').textContent() ?? "";
+
+                const jobDescription: string = await page.locator('.job__description.body > div').nth(1).textContent() ?? "";
+
+                const descriptionText: string = await page.locator('.job__description.body').textContent() ?? "";
+                const payRangeMatch: RegExpMatchArray | null = descriptionText.match(/\$[\d,]+\s*-\s*\$[\d,]+/);
+                const payRange: string = payRangeMatch ? payRangeMatch[0] : "";
+
+                const jobDetails: FullJobDetails = {
+                    jobUrl: job.jobUrl,
+                    jobTitle: job.title,
+                    description: jobDescription.trim(),
+                    payRange: payRange.trim(),
+                    location: location.trim(),
+                    postingDate: "N/A",
+                    jobId: "N/A"
+                }
+                const isValid: boolean = validateJobDetails(jobDetails);
+
+                if (!isValid) {
+                    console.log(`⚠ Invalid data for job: ${i + 1}/${jobUrls.length} - ${job.title}, skipping`);
+                    errorCount++;
+                    continue;
+                }
+
+                jobListings.push(jobDetails);
+                console.log(`✓ Successfully Scraped Job: ${job.title}`);
+                successCount++;
+            } catch (error) {
+                console.error(`✗ Error scraping ${job.title}:`, error);
+                errorCount++;
+            }
+        }
+
+        if (jobUrls.length === 0 || jobListings.length === 0) {
+            console.log("No Listings Found");
+
+            /*
+                Future Implementation - Connect to Slack/Discord to notify of potentially broken scraper or no Listings
+            */
+        }
+        else if (errorCount > 0) {
+            console.log(`Error Scraping Jobs - ${successCount} Successful Scrapes - ${errorCount} Unsuccessful Scrapes`);
+
+            /*
+                Future Implementation - Connect to Slack/Discord Channel to notify of failure
+            */
+        }
+        else {
+            console.log(`\nSuccessfully Scraped ${successCount} Jobs With ${errorCount} Errors`);
+
+            // Create Data JSON
+            const scrapedData: ScrapedData = {
+                companyName: CompanyNames.AFFIRM,
+                scrapedAt: new Date().toISOString(),
+                searchTerm: SEARCH_ENGINEERING,
+                totalJobs: jobListings.length,
+                jobs: jobListings
+            };
+
+            // Delete old output file and store new file
+            const outputDir: string = path.join(__dirname, dataOutputDirectory);
+            deleteOldFiles(outputDir, scraperPrefix);
+            writeNewFile(outputDir, scraperPrefix, scrapedData);
+        }
     } catch (error) {
         console.log("Error Occured While Scraping: " + error);
     } finally {

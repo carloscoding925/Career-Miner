@@ -8,4 +8,5 @@ export enum CompanyNames {
     SCE = "Southern California Edison",
     AMAE_HEALTH = "Amae Health",
     ITS = "ITS Logistics",
+    AFFIRM = "Affirm",
 }
