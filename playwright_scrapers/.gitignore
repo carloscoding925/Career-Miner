@@ -7,3 +7,9 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+# Data Folders
+usage_tracking/*
+data_output/*
+!usage_tracking/.gitkeep
+!data_output/.gitkeep
