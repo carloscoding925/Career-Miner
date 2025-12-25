@@ -9,7 +9,7 @@ import { FILTER_NEW_YORK_LONG, FILTER_REMOTE_US, FILTER_SAN_FRANCISCO } from "..
 import { FullJobDetails, PostingCoverData, ScrapedData } from "../models/data-storage.js";
 import { validateJobDetails } from "../utils/data-util.js";
 import { CompanyNames } from "../models/company-names.js";
-import { dataOutputDirectory } from "../constants/directories.js";
+import { dataOutputDirectory, usageOutputDirectory } from "../constants/directories.js";
 import { deleteOldFiles, writeNewFile } from "../utils/file-io-util.js";
 
 async function scrapeSeatGeekCareers() {
@@ -92,7 +92,7 @@ async function scrapeSeatGeekCareers() {
 
                 const descriptionText: string = await page.locator('.job__description.body').textContent() ?? "";
 
-                let payRangeMatch: RegExpMatchArray | null = descriptionText.match(/\$[\d,]+\s*-\s*\$[\d,]+/);
+                let payRangeMatch: RegExpMatchArray | null = descriptionText.match(/\$[\d,]+\s*-\s*\$?[\d,]+/);
                 let payRange: string = "";
 
                 if (payRangeMatch) {
@@ -117,7 +117,6 @@ async function scrapeSeatGeekCareers() {
 
                 if (!isValid) {
                     console.log(`⚠ Invalid data for job: ${i + 1}/${jobUrls.length} - ${job.title}, skipping`);
-                    console.log(jobDetails);
                     errorCount++;
                     continue;
                 }
@@ -166,6 +165,10 @@ async function scrapeSeatGeekCareers() {
         console.log("Error Occured While Scraping: " + error);
     } finally {
         bandwidthTracker.printSummary();
+
+        const outputDir: string = path.join(__dirname, usageOutputDirectory);
+        deleteOldFiles(outputDir, scraperPrefix);
+        writeNewFile(outputDir, scraperPrefix, bandwidthTracker.returnStats());
 
         await browser.close();
         console.log("\n Finished Running - Scraper 0007 - Affirm Careers");
