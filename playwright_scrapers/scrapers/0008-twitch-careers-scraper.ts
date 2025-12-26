@@ -89,9 +89,15 @@ async function scrapeTwitchCareers() {
                 const payRange: string = await payRangeElement.count() > 0 ? await payRangeElement.textContent() ?? "" : "N/A";
 
                 const description: string = await page.locator('.prose').evaluate((proseDiv) => {
-                    const aboutRoleHeader: HTMLHeadingElement | undefined = Array.from(proseDiv.querySelectorAll('h3')).find(
+                    let aboutRoleHeader: Element | undefined = Array.from(proseDiv.querySelectorAll('h3')).find(
                         h3 => h3.textContent?.includes('About the Role')
                     );
+
+                    if (!aboutRoleHeader) {
+                        aboutRoleHeader = Array.from(proseDiv.querySelectorAll('p')).find(
+                            p => p.querySelector('strong')?.textContent?.includes('About the Role')
+                        );
+                    }
 
                     if (!aboutRoleHeader) {
                         return "";
@@ -100,7 +106,14 @@ async function scrapeTwitchCareers() {
                     let description: string = "";
                     let currentElement: Element | null = aboutRoleHeader.nextElementSibling;
 
-                    while (currentElement && currentElement.tagName !== 'H3') {
+                    while (currentElement) {
+                        if (currentElement.tagName === 'H3') {
+                            break;
+                        }
+                        if (currentElement.tagName === 'P' && currentElement.querySelector('strong')?.textContent?.includes(':')) {
+                            break;
+                        }
+
                         description = description + currentElement.textContent?.trim() + '\n\n';
                         currentElement = currentElement.nextElementSibling;
                     }

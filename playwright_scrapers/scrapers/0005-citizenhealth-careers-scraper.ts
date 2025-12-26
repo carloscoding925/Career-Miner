@@ -54,9 +54,16 @@ async function scrapeCitizenHealthCareers() {
 
         console.log(`Filtering Job Listings by Department: ${SEARCH_ENGINEERING}`);
 
-        const departmentSelect = iframe.locator('select[name="departmentId"]');
-        await departmentSelect.waitFor({ state: 'visible', timeout: 10000 });
-        await departmentSelect.selectOption({ label: SEARCH_ENGINEERING });
+        const departmentSelect: Locator = iframe.locator('select[name="departmentId"]');
+        const options: Locator[] = await departmentSelect.locator('option').all();
+        for (const option of options) {
+            const text: string = await option.textContent() ?? "";
+            if (text.includes(`${SEARCH_ENGINEERING}`)) {
+                const value: string = await option.getAttribute('value') ?? "";
+                await departmentSelect.selectOption({ value: value });
+                break;
+            }
+        }
         await page.waitForTimeout(1500);
 
         console.log('Successfully filtered jobs by department');
