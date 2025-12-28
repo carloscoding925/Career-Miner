@@ -3,6 +3,7 @@ package com.career_miner.careerminer_api.utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.career_miner.careerminer_api.repositories.Repository;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -32,6 +33,12 @@ public class DatabaseUtil {
         config.setKeepaliveTime(60000);
 
         dataSource = new HikariDataSource(config);
+
+        try {
+            Repository.createDatabaseSchema(dataSource);
+        } catch (Exception ex) {
+            logger.error("Caught Exception: " + ex);
+        }
     }
 
     public static synchronized DatabaseUtil getInstance() {
