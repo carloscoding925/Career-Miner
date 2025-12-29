@@ -27,7 +27,6 @@ public class DataRepository extends BaseRepository {
         try (Connection connection = dataSource.getConnection(); PreparedStatement statement = connection.prepareStatement(insertSQL)) {
             statement.setString(1, company.asText());
             statement.setObject(2, data, Types.OTHER);
-            logger.info(statement.toString());
 
             int results = statement.executeUpdate();
             if (results == 0) {

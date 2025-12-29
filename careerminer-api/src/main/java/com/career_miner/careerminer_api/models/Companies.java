@@ -21,4 +21,14 @@ public enum Companies {
     public String asText() {
         return this.text;
     }
+
+    public static Companies fromText(String text) {
+        for (Companies company : Companies.values()) {
+            if (company.text.equals(text)) {
+                return company;
+            }
+        }
+
+        throw new IllegalArgumentException("Unknown Company: " + text);
+    }
 }

@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.util.List;
 
 public record ScrapedData(
-    Companies company,
+    String companyName,
     Instant scrapedAt,
     String searchTerm,
     int totalJobs,
