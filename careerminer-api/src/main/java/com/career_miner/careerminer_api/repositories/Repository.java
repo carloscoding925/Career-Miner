@@ -24,14 +24,33 @@ public abstract class Repository implements AutoCloseable {
     public static void createDatabaseSchema(HikariDataSource dataSource) {
         String createDatabaseSQL = 
             """
-                -- Table Schemas
+                -- Schemas
                 CREATE SCHEMA IF NOT EXISTS public;
+                CREATE SCHEMA IF NOT EXISTS company;
                 CREATE SCHEMA IF NOT EXISTS data;
 
-                CREATE TABLE IF NOT EXISTS data.scraped (
+                -- Company Tables
+                CREATE TABLE IF NOT EXISTS company.companies (
                     id serial PRIMARY KEY,
-                    company text UNIQUE,
-                    data jsonb NOT NULL DEFAULT '[]'::jsonb
+                    name text UNIQUE
+                );
+                INSERT INTO company.companies (name) VALUES
+                    ('Berkshire Hathaway Energy'), ('Citizen Health'), ('Citadel'), ('Jane Street'), ('Twitch'),
+                    ('Pacific Gas & Electric'), ('Southern California Edison'), ('Amae Health'), ('ITS Logistics'),
+                    ('Affirm')
+                ON CONFLICT DO NOTHING;
+
+                -- Data Tables
+                CREATE TABLE IF NOT EXISTS data.postings (
+                    company_id serial PRIMARY KEY,
+                    data jsonb NOT NULL DEFAULT '[]'::jsonb,
+                    created_date timestamp without time zone NOT NULL DEFAULT NOW()
+                );
+
+                CREATE TABLE IF NOT EXISTS data.usage (
+                    company_id serial PRIMARY KEY,
+                    data jsonb NOT NULL DEFAULT '[]'::jsonb,
+                    created_date timestamp without time zone NOT NULL DEFAULT NOW()
                 );
             """;
         try (Connection connection = dataSource.getConnection(); PreparedStatement statement = connection.prepareStatement(createDatabaseSQL)) {
