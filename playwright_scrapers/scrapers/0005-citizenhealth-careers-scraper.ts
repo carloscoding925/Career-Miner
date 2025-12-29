@@ -10,6 +10,7 @@ import { SEARCH_ENGINEERING } from "../constants/search-terms.js";
 import { FullJobDetails, PostingCoverData, ScrapedData } from "../models/data-storage.js";
 import { validateJobDetails } from "../utils/data-util.js";
 import { CompanyNames } from "../models/company-names.js";
+import { sendToApi } from "../utils/api-util.js";
 
 async function scrapeCitizenHealthCareers() {
     console.log("Running Scraper 0005 - Citizen Health Careers");
@@ -208,6 +209,13 @@ async function scrapeCitizenHealthCareers() {
             const outputDir: string = path.join(__dirname, dataOutputDirectory);
             deleteOldFiles(outputDir, scraperPrefix);
             writeNewFile(outputDir, scraperPrefix, scrapedData);
+
+            try {
+                await sendToApi(scrapedData);
+                console.log("✓ Data successfully sent to Spring API");
+            } catch (error) {
+                console.error("✗ API call failed");
+            }
         }
     } catch (error) {
         console.log("Error Occured While Scraping: " + error);
