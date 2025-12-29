@@ -10,18 +10,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.career_miner.careerminer_api.utils.DatabaseUtil;
 import com.zaxxer.hikari.HikariDataSource;
 
-public abstract class Repository implements AutoCloseable {
-    private static final Logger logger = LogManager.getLogger(Repository.class);
+public abstract class BaseRepository implements AutoCloseable {
+    private static final Logger logger = LogManager.getLogger(BaseRepository.class);
     public HikariDataSource dataSource;
     
     @Autowired
-    protected Repository() {
-        logger.info("Initializing Database Schema");
+    protected BaseRepository() {
         DatabaseUtil databaseInstance = DatabaseUtil.getInstance();
         dataSource = databaseInstance.getDataSource();
     }
 
     public static void createDatabaseSchema(HikariDataSource dataSource) {
+        logger.info("Initializing Database Schema");
+
         String createDatabaseSQL = 
             """
                 -- Schemas
