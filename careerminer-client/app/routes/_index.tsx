@@ -1,4 +1,5 @@
 import { useLoaderData } from "react-router";
+import type { ScrapedData } from "~/models/scraped-data";
 
 export async function loader() {
     const dataResponse: Response = await fetch('http://localhost:8080/data/job-information/get', {
@@ -13,11 +14,13 @@ export async function loader() {
         throw new Response(null, { status: 500 });
     }
 
-    return null;
+    const data: ScrapedData[] = await dataResponse.json();
+
+    return data;
 }
 
 export default function Component() {
-    const loaderData = useLoaderData<typeof loader>();
+    const loaderData: ScrapedData[] = useLoaderData<typeof loader>();
 
     return (
         <div>
