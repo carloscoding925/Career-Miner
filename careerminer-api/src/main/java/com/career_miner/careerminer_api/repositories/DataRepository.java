@@ -2,13 +2,20 @@ package com.career_miner.careerminer_api.repositories;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Repository;
 
 import com.career_miner.careerminer_api.models.Companies;
+import com.career_miner.careerminer_api.models.ScrapedData;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @Repository
 public class DataRepository extends BaseRepository {
@@ -42,6 +49,36 @@ public class DataRepository extends BaseRepository {
         } catch (Exception ex) {
             logger.error("Caught Exception: " + ex);
             return false;
+        }
+    }
+
+    public List<ScrapedData> fetchAllCompanyData() {
+        String fetchSQL = 
+            """
+                SELECT data
+                FROM data.postings;
+            """;
+        try (Connection connection = dataSource.getConnection(); PreparedStatement statement = connection.prepareStatement(fetchSQL)) {
+            ResultSet resultSet = statement.executeQuery();
+
+            List<ScrapedData> allData = new ArrayList<>();
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.registerModule(new JavaTimeModule());
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+            while (resultSet.next()) {
+                String jsonData = resultSet.getString("data");
+                if (jsonData != null && !jsonData.isEmpty()) {
+                    ScrapedData scrapedData = objectMapper.readValue(jsonData, ScrapedData.class);
+                    allData.add(scrapedData);
+                }
+            }
+
+            return allData;
+        } catch (Exception ex) {
+            logger.error("Caught Exception: " + ex);
+            return List.of();
         }
     }
 }

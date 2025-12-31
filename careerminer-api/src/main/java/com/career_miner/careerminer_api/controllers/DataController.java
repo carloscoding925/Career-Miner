@@ -65,9 +65,14 @@ public class DataController {
         logger.info("Fetching All Company Data");
 
         try {
-            
+            List<ScrapedData> data = this.dataRepository.fetchAllCompanyData();
+            if (data.size() == 0) {
+                logger.error("Failed to gather all company data");
+                return ResponseEntity.internalServerError().build();
+            }
+            logger.info("Successfully Fetched All Data");
 
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok().body(data);
         } catch (Exception ex) {
             logger.error("Caught Exception: " + ex);
             return ResponseEntity.internalServerError().build();
