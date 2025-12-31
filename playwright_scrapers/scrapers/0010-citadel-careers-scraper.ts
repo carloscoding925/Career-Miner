@@ -11,6 +11,7 @@ import { FILTER_AMERICAS } from "../constants/filters.js";
 import { FullJobDetails, PostingCoverData, ScrapedData } from "../models/data-storage.js";
 import { validateJobDetails } from "../utils/data-util.js";
 import { CompanyNames } from "../models/company-names.js";
+import { sendToApi } from "../utils/api-util.js";
 
 async function scrapeCitadelCareers() {
     console.log("Running Scraper 0010 - Citadel Careers");
@@ -180,6 +181,14 @@ async function scrapeCitadelCareers() {
             const outputDir: string = path.join(__dirname, dataOutputDirectory);
             deleteOldFiles(outputDir, scraperPrefix);
             writeNewFile(outputDir, scraperPrefix, scrapedData);
+
+            // Send data to API
+            try {
+                await sendToApi(scrapedData);
+                console.log("✓ Data successfully sent to Spring API");
+            } catch (error) {
+                console.error("✗ API call failed");
+            }
         }
     } catch (error) {
         console.log("Error Occured While Scraping: " + error);

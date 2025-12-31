@@ -10,6 +10,7 @@ import { CompanyNames } from "../models/company-names.js";
 import { createJobDetails, validateJobDetails } from "../utils/data-util.js";
 import { CompanyUrls } from "../models/companies.js";
 import { BandwidthTracker } from "../utils/bandwidth-util.js";
+import { sendToApi } from "../utils/api-util.js";
 
 async function scrapeBheCareers() {
     console.log("Running Scraper 0001 - BHE Careers");
@@ -180,6 +181,14 @@ async function scrapeBheCareers() {
             const outputDir: string = path.join(__dirname, dataOutputDirectory);
             deleteOldFiles(outputDir, scraperPrefix);
             writeNewFile(outputDir, scraperPrefix, scrapedData);
+
+            // Send data to API
+            try {
+                await sendToApi(scrapedData);
+                console.log("✓ Data successfully sent to Spring API");
+            } catch (error) {
+                console.error("✗ API call failed");
+            }
         }
     } catch (error) {
         console.log("Error Occured While Scraping: " + error);

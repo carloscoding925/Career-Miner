@@ -210,6 +210,7 @@ async function scrapeCitizenHealthCareers() {
             deleteOldFiles(outputDir, scraperPrefix);
             writeNewFile(outputDir, scraperPrefix, scrapedData);
 
+            // Send data to API
             try {
                 await sendToApi(scrapedData);
                 console.log("✓ Data successfully sent to Spring API");
