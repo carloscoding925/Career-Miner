@@ -3,6 +3,8 @@ package com.career_miner.careerminer_api.controllers;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -27,14 +29,19 @@ public class DataController {
         this.dataRepository = dataRepository;
     }
 
-    @PostMapping("/data/job-information")
+    @PostMapping("/data/job-information/post")
     ResponseEntity<String> createData(@RequestHeader String authorization, @RequestBody ScrapedData data) {
+        logger.info("Storing Data");
+
         if (data == null) {
             return ResponseEntity.badRequest().body("Bad Data");
         }
 
         try {
             Companies company = Companies.fromText(data.companyName());
+            if (company == null) {
+                return ResponseEntity.badRequest().body("Invalid Company Name In Data");
+            }
 
             String jsonData = this.objectMapper.writeValueAsString(data);
 
@@ -50,5 +57,17 @@ public class DataController {
             logger.error("Caught Exception: " + ex);
             return ResponseEntity.internalServerError().body("Error");
         }
+    }
+
+    @GetMapping("data/job-information/get/{companyName}")
+    ResponseEntity<ScrapedData> fetchData(@RequestHeader String authorization, @PathVariable String companyName) {
+        logger.info("Fetching Data for Company: " + companyName);
+
+        Companies company = Companies.fromText(companyName);
+        if (company == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        return ResponseEntity.ok().build();
     }
 }
