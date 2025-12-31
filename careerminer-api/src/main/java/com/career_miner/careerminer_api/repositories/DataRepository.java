@@ -18,11 +18,15 @@ public class DataRepository extends BaseRepository {
         logger.info("Initializing Data Repository");
     }
 
-    public boolean insertScrapedData(Companies company, String data) {
+    public boolean upsertScrapedData(Companies company, String data) {
         String insertSQL = 
             """
                 INSERT INTO data.postings (company_id, data)
-                VALUES((SELECT id FROM company.companies WHERE name = ?), ?);
+                VALUES((SELECT id FROM company.companies WHERE name = ?), ?)
+                ON CONFLICT (company_id)
+                DO UPDATE SET
+                    data = EXCLUDED.data,
+                    updated_date = NOW();
             """;
         try (Connection connection = dataSource.getConnection(); PreparedStatement statement = connection.prepareStatement(insertSQL)) {
             statement.setString(1, company.asText());

@@ -38,7 +38,7 @@ public class DataController {
 
             String jsonData = this.objectMapper.writeValueAsString(data);
 
-            boolean result = this.dataRepository.insertScrapedData(company, jsonData);
+            boolean result = this.dataRepository.upsertScrapedData(company, jsonData);
 
             if (!result) {
                 return ResponseEntity.internalServerError().body("Database Error");

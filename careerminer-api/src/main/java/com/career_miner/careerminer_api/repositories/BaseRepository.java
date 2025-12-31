@@ -45,7 +45,7 @@ public abstract class BaseRepository implements AutoCloseable {
                 CREATE TABLE IF NOT EXISTS data.postings (
                     company_id serial PRIMARY KEY,
                     data jsonb NOT NULL DEFAULT '[]'::jsonb,
-                    created_date timestamp without time zone NOT NULL DEFAULT NOW()
+                    updated_date timestamp without time zone NOT NULL DEFAULT NOW()
                 );
 
                 CREATE TABLE IF NOT EXISTS data.usage (
